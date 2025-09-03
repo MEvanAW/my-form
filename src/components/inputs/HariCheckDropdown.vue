@@ -17,7 +17,7 @@
         <div class="row">
           <div class="col form-check" @click="semuaHariToggle()">
             <input id="semuaHari" class="form-check-input" type="checkbox" :checked="semuaHari" />
-            <label for="semuaHari" class="form-check-label tsm-min-width"> SEMUA </label>
+            <label for="semuaHari" class="form-check-label my-min-width"> SEMUA </label>
           </div>
           <div class="col form-check">
             <input
@@ -27,7 +27,7 @@
               class="form-check-input"
               type="checkbox"
             />
-            <label for="kamis" class="form-check-label tsm-min-width"> Kamis </label>
+            <label for="kamis" class="form-check-label my-min-width"> Kamis </label>
           </div>
         </div>
       </li>
@@ -41,7 +41,7 @@
               class="form-check-input"
               type="checkbox"
             />
-            <label for="senin" class="form-check-label tsm-min-width"> Senin </label>
+            <label for="senin" class="form-check-label my-min-width"> Senin </label>
           </div>
           <div class="col form-check">
             <input
@@ -51,7 +51,7 @@
               class="form-check-input"
               type="checkbox"
             />
-            <label for="jumat" class="form-check-label tsm-min-width"> Jumat </label>
+            <label for="jumat" class="form-check-label my-min-width"> Jumat </label>
           </div>
         </div>
       </li>
@@ -65,7 +65,7 @@
               class="form-check-input"
               type="checkbox"
             />
-            <label for="selasa" class="form-check-label tsm-min-width"> Selasa </label>
+            <label for="selasa" class="form-check-label my-min-width"> Selasa </label>
           </div>
           <div class="col form-check">
             <input
@@ -75,7 +75,7 @@
               class="form-check-input"
               type="checkbox"
             />
-            <label for="sabtu" class="form-check-label tsm-min-width"> Sabtu </label>
+            <label for="sabtu" class="form-check-label my-min-width"> Sabtu </label>
           </div>
         </div>
       </li>
@@ -89,7 +89,7 @@
               class="form-check-input"
               type="checkbox"
             />
-            <label for="rabu" class="form-check-label tsm-min-width"> Rabu </label>
+            <label for="rabu" class="form-check-label my-min-width"> Rabu </label>
           </div>
           <div class="col form-check">
             <input
@@ -99,7 +99,7 @@
               class="form-check-input"
               type="checkbox"
             />
-            <label for="minggu" class="form-check-label tsm-min-width"> Minggu </label>
+            <label for="minggu" class="form-check-label my-min-width"> Minggu </label>
           </div>
         </div>
       </li>
