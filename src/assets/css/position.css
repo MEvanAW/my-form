@@ -1,0 +1,18 @@
+@media (min-width: 576px) {
+  .my-position-sm-relative {
+    position: relative !important;
+  }
+}
+@media (min-width: 768px) {
+  .my-position-md-relative {
+    position: relative !important;
+  }
+}
+@media (min-width: 768px) {
+  .my-md-end {
+    position: absolute !important;
+    transform: translateY(-50%) !important;
+    right: 0 !important;
+    top: 50% !important;
+  }
+}
