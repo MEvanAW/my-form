@@ -89,12 +89,7 @@
                     <SortAlphabetAscending v-if="sortBy == sortByEnum.jabatanAscending" />
                     <SortAlphabetDescending v-else-if="sortBy == sortByEnum.jabatanDescending" />
                   </th>
-                  <th
-                    v-if="isShift"
-                    scope="col"
-                    class="my-position-md-relative"
-                    @click="sortByShift()"
-                  >
+                  <th scope="col" class="my-position-md-relative" @click="sortByShift()">
                     SHIFT
                     <SortAlphabetAscending v-if="sortBy === fieldKeys.shift && isAscending" />
                     <SortAlphabetDescending v-else-if="sortBy === fieldKeys.shift" />
@@ -116,7 +111,7 @@
                   <td class="text-center">{{ karyawan.nik }}</td>
                   <td>{{ karyawan.name }}</td>
                   <td v-if="displayJabatan">{{ karyawan.jabatan }}</td>
-                  <td v-if="isShift">{{ karyawan?.[fieldKeys.shift] }}</td>
+                  <td>{{ karyawan?.[fieldKeys.shift] }}</td>
                 </tr>
               </tbody>
             </table>
@@ -160,26 +155,23 @@ const danger = 'danger'
 const fieldKeys = Object.freeze({
   shift: 'shift',
 })
-const warning = 'warning'
 const emptyArray = Object.freeze([])
 
 const props = defineProps({
   isNikInput: Boolean,
   emitArg: null,
-  populate: Function,
-  populateArg: Array,
-  populationToggle: null,
+  employees: Array,
   displayJabatan: Boolean,
 })
 const emit = defineEmits(['pilih'])
 
 const errorMessage = ref('')
 const displayWarningMessage = ref(strings.emptyString)
-const employees = ref([])
+const employees = ref(emptyArray)
 const isAscending = ref(true)
 const nikForCari = ref('')
 const searchKeyword = ref('')
-const displayEmployees = ref(employees.value.slice(0, 5))
+const displayEmployees = ref(employees.value)
 const sortBy = ref(sortByEnum.nikAscending)
 const alertType = ref(danger)
 const filteredEmployees = computed(() =>
@@ -190,8 +182,7 @@ const filteredEmployees = computed(() =>
       karyawan?.[fieldKeys.shift]?.includes(searchKeyword.value),
   ),
 )
-const isShift = computed(() => props.populateArg?.[4])
-const min = computed(() => Math.min(5, filteredEmployees.value.length))
+const min = computed(() => Math.min(5, filteredEmployees.value.length || 1))
 const max = computed(() => Math.min(filteredEmployees.value.length, 99))
 const showInput = ref(min.value)
 const validatedShow = ref(min.value)
@@ -220,31 +211,18 @@ watch(filteredEmployees, (f) => {
     showInput.value = min.value
   }
 })
-// A workaround to trigger toggle from parent
 watch(
-  () => props.populationToggle,
-  // eslint-disable-next-line no-unused-vars
-  (_) => {
-    if (props.populate) {
-      employees.value = emptyArray
-      displayWarningMessage.value = strings.defaultLoadingMessage
-      props.populate
-        .apply(this, props.populateArg)
-        .then(function (response) {
-          employees.value = response?.data?.constructor === Array ? response.data : emptyArray
-          errorMessage.value = strings.emptyString
-        })
-        .catch(function (error) {
-          errorMessage.value = error?.errorMessage || 'Mohon maaf, gagal mengambil data karyawan.'
-        })
-        .finally(function () {
-          displayWarningMessage.value = strings.emptyString
-        })
+  () => props.employees,
+  (newEmployees) => {
+    if (newEmployees?.constructor === Array) {
+      employees.value = newEmployees
+      navigate(1)
     }
   },
+  { immediate: true },
 )
 
-function cari(nik) {
+function cari() {
   if (cariIsInvalid.value) {
     return
   }

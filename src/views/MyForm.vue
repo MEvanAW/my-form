@@ -1,4 +1,5 @@
 <template>
+  <div class="mt-3"></div>
   <div v-if="errorMessage" class="alert alert-danger" role="alert">
     {{ errorMessage }}
   </div>
@@ -41,6 +42,9 @@
               data-bs-toggle="modal"
               data-bs-target="#cariKaryawanModal"
               :disabled="!inputModels.toko.value"
+              :title="
+                inputModels.toko.value ? viewStrings.emptyString : viewStrings.cariKaryawanTitle
+              "
             >
               Cari
             </InfoButton>
@@ -54,45 +58,6 @@
         <label for="jabatan" class="col-sm-4 col-form-label">Jabatan</label>
         <div class="col-sm-8">
           <span id="jabatan" class="input-group-text">{{ jabatan || 'Jabatan' }}</span>
-        </div>
-      </div>
-      <div class="row mb-2">
-        <label for="idGroupShift" class="col-sm-4 col-form-label">ID Group Shift</label>
-        <div class="col-sm-8">
-          <span id="idGroupShift" class="input-group-text">{{
-            karyawan.idShiftGroup.value || viewStrings.idGroupShift
-          }}</span>
-        </div>
-      </div>
-      <div class="row mb-2">
-        <label for="tanggalLembur" class="col-sm-4 col-form-label">Tanggal Lembur</label>
-        <div class="col-sm-8">
-          <DateInput
-            id="tanggalLembur"
-            :required="true"
-            errorMessage="Tanggal lembur wajib dipilih."
-            :validation-toggle="validationToggle"
-            :min="dateInputMin()"
-            :max="dateInputMax()"
-            :picked="inputModels.tanggalLembur.value"
-            @change="change"
-          />
-        </div>
-      </div>
-      <div class="row mb-2">
-        <label for="nomorSpl" class="col-lg-4 col-form-label">Nomor SPL</label>
-        <div class="col-lg-8">
-          <div class="input-group">
-            <SelectInput
-              id="nomorSpl"
-              placeholder="Pilih Nomor SPL"
-              :options="nomorSplOptions"
-              error-message="Nomor SPL invalid."
-              :validation-toggle="validationToggle"
-              :selected="inputModels.nomorSpl.value"
-              @change="change"
-            />
-          </div>
         </div>
       </div>
       <div class="row mb-2">
@@ -114,51 +79,34 @@
         </div>
       </div>
       <div class="row mb-2">
-        <label for="alasanLembur" class="col-sm-4 col-form-label">Alasan Lembur</label>
+        <label for="tanggalLembur" class="col-sm-4 col-form-label">Tanggal Lembur</label>
         <div class="col-sm-8">
-          <SelectInput
-            id="alasanLembur"
-            placeholder="Pilih Alasan Lembur"
+          <DateInput
+            id="tanggalLembur"
             :required="true"
-            :options="alasanLemburOptions"
-            error-message="Alasan lembur wajib dipilih."
+            errorMessage="Tanggal lembur wajib dipilih."
             :validation-toggle="validationToggle"
-            :selected="inputModels.alasanLembur.value"
+            :min="dateInputMin()"
+            :max="dateInputMax()"
+            :picked="inputModels.tanggalLembur.value"
             @change="change"
           />
         </div>
       </div>
-      <div v-show="subAlasanOptions !== emptyArray" class="row mb-2">
-        <label for="alasanLembur" class="col-sm-4 col-form-label">Sub Alasan</label>
+      <div class="row mb-2">
+        <label for="rincianTugas" class="col-sm-4 col-form-label">Rincian Tugas</label>
         <div class="col-sm-8">
-          <SelectInput
-            id="subAlasan"
-            placeholder="Pilih Sub Alasan"
-            :required="true"
-            :options="subAlasanOptions"
-            error-message="Sub alasan wajib dipilih."
-            :validation-toggle="validationToggle"
-            :selected="inputModels.subAlasan.value"
-            @change="change"
-          />
+          <textarea
+            v-model="rincianTugas"
+            id="rincianTugas"
+            class="form-control"
+            rows="3"
+            maxlength="160"
+          ></textarea>
         </div>
       </div>
     </div>
     <div class="col-sm ms-lg-4">
-      <div class="row mb-2">
-        <label for="alasanBaSpl" class="col-sm-4 col-form-label">Alasan Pengajuan BA SPL</label>
-        <div class="col-sm-8">
-          <SelectInput
-            id="alasanBaSpl"
-            placeholder="Pilih Alasan Pengajuan BA SPL"
-            :required="true"
-            :options="alasanBaSplOptions"
-            error-message="Alasan pengajuan BA SPL wajib dipilih."
-            :validation-toggle="validationToggle"
-            @change="change"
-          />
-        </div>
-      </div>
       <div class="row mb-2">
         <label for="aturBerdasarkan" class="col-sm-4 col-form-label">Lembur Berdasarkan</label>
         <div class="col-sm-8">
@@ -169,7 +117,7 @@
             :options="aturBerdasarkanOptions"
             error-message="Dasar pengaturan wajib dipilih."
             :validation-toggle="validationToggle"
-            :disabled="shift?.toUpperCase() === viewStrings.off || !inputModels.alasanLembur.value"
+            :disabled="shift?.toUpperCase() === viewStrings.off"
             :selected="inputModels.aturBerdasarkan.value"
             @change="change"
           />
@@ -223,7 +171,6 @@
                   :validation-toggle="validationToggle"
                   :picked="inputModels.jamMulaiLembur.value"
                   :disabled="durasiLemburDisabled"
-                  :min="jamMulaiLemburMin"
                   @change="change"
                   @invalidate="invalidate"
                 />
@@ -304,21 +251,8 @@
         </div>
       </div>
       <div class="row mb-2">
-        <label for="rincianTugas" class="col-sm-4 col-form-label">Rincian Tugas</label>
-        <div class="col-sm-8">
-          <textarea
-            v-model="rincianTugas"
-            id="rincianTugas"
-            class="form-control"
-            rows="3"
-            maxlength="160"
-          ></textarea>
-        </div>
-      </div>
-      <div class="row mb-2">
         <div class="col-lg-4">
-          <label for="dokumenPendukung" class="col-form-label">Dokumen Pendukung</label
-          ><br class="d-inline d-lg-none" />
+          <label for="dokumenPendukung" class="col-form-label">Dokumen Pendukung</label><br />
           <small class="text-danger"><i>*Max. 1 MB</i></small
           ><br />
           <small class="text-danger"><i>*Format file JPEG, JPG, PNG, PDF</i></small>
@@ -339,9 +273,21 @@
           </div>
         </div>
       </div>
+      <div class="row mb-2">
+        <div class="col-lg-3"></div>
+        <div class="col-lg-6 d-grid gap-2">
+          <button class="btn btn-success">Ajukan</button>
+        </div>
+        <div class="col-lg-3"></div>
+      </div>
     </div>
   </div>
-  <CariKaryawanModal :is-nik-input="false" @pilih="pilih" :display-jabatan="true" />
+  <CariKaryawanModal
+    :display-jabatan="true"
+    :employees="employees"
+    :is-nik-input="false"
+    @pilih="pilih"
+  />
   <BerhasilModal :symbol="berhasilModalToggle" :is-static="true" @konfirmasi-berhasil="refresh"
     >Pengajuan BA SPL berhasil disimpan!</BerhasilModal
   >
@@ -359,97 +305,109 @@ import NumberInput from '@/components/inputs/NumberInput.vue'
 import SelectInput from '@/components/inputs/SelectInput.vue'
 import { strings } from '@/models/strings'
 import TimeInput from '@/components/inputs/TimeInput.vue'
+import { timesService } from '@/services/times'
 
 const aturBerdasarkanEnum = Object.freeze({
   durasiLembur: Symbol(1),
   shiftLembur: Symbol(2),
 })
 const viewStrings = Object.freeze({
-  alasanListErrorMessage: 'Mohon maaf, gagal mengambil data alasan.',
-  cariKaryawan: 'Cari karyawan',
-  dokumenPendukungWajibDiisi: 'Dokumen pendukung wajib diisi.',
+  cariKaryawanTitle: 'Silakan pilih kode toko terlebih dahulu.',
   durasiLembur: 'Durasi',
-  employeeShiftErrorMessage: 'Mohon maaf, gagal mengambil data shift.',
-  hapusNomorSplSebelumCariKaryawanLain: 'Hapus nomor SPL sebelum cari karyawan lain',
+  emptyString: strings.emptyString,
+  enam: '6',
+  fileMax1Mb: 'File tidak boleh melebihi 1 MB.',
+  formatFileTidakDidukung: 'Format file tidak didukung.',
   idGroupShift: 'ID Group Shift',
+  jabatanErrorMessage: 'Mohon maaf, gagal mengisi data jabatan. Mohon laporkan ke pengembang.',
   jamMulai: 'Jam Mulai',
+  jamNol: '00:00:00',
   jamSelesai: 'Jam Selesai',
+  lima: '5',
+  maxTime: '23:59:59',
   namaKaryawanDefault: 'Nama karyawan tak terbaca',
   nikDefault: 'NIK tak terbaca',
-  nomorSplSudahTerbayarErrorMessage:
-    'Nomor SPL terpilih sudah terbayar sehingga tidak bisa dibuatkan BA SPL.',
-  pilihKaryawan: 'Pilih Karyawan',
-  sebelumSetelahShiftWajibDipilih: 'Sebelum/setelah shift wajib dipilih.',
   shift: 'Shift',
-  simpanButtonTitle: 'Mohon pilih nomor SPL dengan status selain terbayar.',
-  waktuLemburHarusBackTime: 'Waktu lembur untuk BA SPL harus backtime.',
   off: 'OFF',
-  jamShiftLemburErrorMessage: 'Mohon maaf, gagal mengambil data jam shift lembur.',
-  jamNol: '00:00:00',
-  maxTime: '23:59:59',
-  emptyString: strings.emptyString,
-  y: 'Y',
-  n: 'N',
-  createBaSplErrorMessage: 'Mohon maaf, gagal mengajukan BA SPL.',
-  dateServerValidationError: 'Mohon maaf, service gagal memvalidasi tanggal SPL.',
-  getListNoSplErrorMessage: 'Mohon maaf, gagal mengambil nomor SPL.',
-  jabatanErrorMessage: 'Mohon maaf, gagal mengisi data jabatan. Mohon laporkan ke pengembang.',
-  defaultLoadingWarningMessage: 'Sedang mengambil data dari service ...',
-  satu: '1',
-  dua: '2',
-  tiga: '3',
-  lima: '5',
-  enam: '6',
-  formatFileTidakDidukung: 'Format file tidak didukung.',
-  fileMax1Mb: 'File tidak boleh melebihi 1 MB.',
 })
 const emptyArray = Object.freeze([])
 const supportedFileTypes = Object.freeze(['image/png', 'image/jpeg', 'application/pdf'])
 
+const employees = [
+  {
+    jabatan: 'PIMPINAN SHIFT',
+    name: 'FULAN',
+    nik: '1999010220000304',
+    shift: '1',
+    shift_end: '11:30:00',
+    shift_start: '08:00:00',
+  },
+  {
+    jabatan: 'STORE CREW',
+    name: 'FULANAH',
+    nik: '2000020320010405',
+    shift: '2',
+    shift_end: '16:30:00',
+    shift_start: '13:00:00',
+  },
+]
 const errorMessage = ref('')
 const warningMessage = ref(viewStrings.emptyString)
 const selectedToko = ref('')
-const durasiLemburMax = ref(7)
+const durasiLemburMax = ref(8)
 const inputModels = {
-  alasanLembur: ref(''),
-  alasanBaSpl: ref(''),
   aturBerdasarkan: ref(viewStrings.emptyString),
   durasiLembur: ref(1),
   jamMulaiLembur: ref(null),
   jamSelesaiLembur: ref(null),
-  subAlasan: ref(viewStrings.emptyString),
   tanggalLembur: ref(''),
   toko: ref(''),
-  nomorSpl: ref(''),
 }
 const invalidInputs = {
-  jamMulaiLembur: false,
   jamSelesaiLembur: false,
 }
 const shiftLembur = ref('')
 const karyawan = {
   nik: viewStrings.emptyString,
   name: viewStrings.emptyString,
-  idShiftGroup: ref(viewStrings.emptyString),
   display: ref(viewStrings.emptyString),
 }
 const jabatan = ref('')
 const shift = ref(viewStrings.shift)
 const shiftMulai = ref(viewStrings.emptyString)
 const shiftSelesai = ref(viewStrings.emptyString)
-const kodeTokoOptions = ref([])
-const alasanLemburOptions = ref([])
-const alasanBaSplOptions = ref([])
+const kodeTokoOptions = [
+  {
+    label: 'FRESH ANCOL 1',
+    value: 'T001',
+  },
+  {
+    label: 'TOKO LAIN',
+    value: 'LAIN',
+  },
+]
 const validationToggle = ref(false)
 const berhasilModalToggle = ref(false)
 const isKaryawanInvalid = ref(false)
-const shiftLemburOptions = ref(emptyArray)
+const shiftLemburOptions = [
+  {
+    label: '1',
+    shift_end: '11:30:00',
+    shift_start: '08:00:00',
+    value: '1',
+  },
+  {
+    label: '2',
+    shift_end: '16:30:00',
+    shift_start: '13:00:00',
+    value: '2',
+  },
+]
 const jamShiftLembur = {
   jamMulai: ref(''),
   jamSelesai: ref(''),
 }
 const rincianTugas = ref('')
-const nomorSplOptions = ref(emptyArray)
 let file = null
 const isFileInvalid = ref(false)
 const fileInvalidMessage = ref('File invalid.')
@@ -461,18 +419,6 @@ const shiftLemburDisabled = computed(
   () => inputModels.aturBerdasarkan.value !== aturBerdasarkanEnum.shiftLembur,
 )
 const isIstirahat = computed(() => inputModels.durasiLembur.value >= 5)
-const jamMulaiLembur = computed(() => {
-  if (!shiftMulai.value || !inputModels.jamSelesaiLembur.value) {
-    return viewStrings.emptyString
-  }
-  const pergeseranJam = isIstirahat.value
-    ? -inputModels.durasiLembur.value - 1
-    : -inputModels.durasiLembur.value
-  return timesService.translateTimeByHour(inputModels.jamSelesaiLembur.value, pergeseranJam)
-})
-const jamMulaiLemburMin = computed(() => {
-  return shiftSelesai.value === viewStrings.off ? viewStrings.jamNol : shiftSelesai.value
-})
 const jamSelesaiLembur = computed(() => {
   if (!shiftSelesai.value || !inputModels.jamMulaiLembur.value) {
     return viewStrings.emptyString
@@ -489,16 +435,6 @@ const aturBerdasarkanOptions = computed(() => {
   ]
 })
 const displayWarningMessage = computed(() => warningMessage.value || viewStrings.emptyString)
-const subAlasanOptions = computed(() => {
-  const option = alasanLemburOptions.value.find(
-    (option) => option?.value === inputModels.alasanLembur.value,
-  )
-  return (
-    option?.sub_alasan?.map((sub) => {
-      return { value: sub, label: sub }
-    }) || emptyArray
-  )
-})
 
 watch(shiftLemburDisabled, (newShiftLemburDisabled) => {
   if (newShiftLemburDisabled) {
@@ -508,7 +444,7 @@ watch(shiftLemburDisabled, (newShiftLemburDisabled) => {
   }
 })
 watch(
-  [durasiLemburDisabled, jamSelesaiLembur, jamMulaiLembur, inputModels.durasiLembur],
+  [durasiLemburDisabled, jamSelesaiLembur, inputModels.durasiLembur],
   ([newDurasiLemburDisabled, newJamSelesaiLembur]) => {
     if (newDurasiLemburDisabled) {
       return
@@ -520,27 +456,25 @@ watch(
 function pilih(terpilih) {
   karyawan.nik = terpilih.nik
   karyawan.name = terpilih.name
-  karyawan.idShiftGroup.value = terpilih.id_shift_group
-  if (karyawan.idShiftGroup.value.startsWith?.(viewStrings.lima)) {
-    durasiLemburMax.value = 8
-  } else if (karyawan.idShiftGroup.value.startsWith?.(viewStrings.enam)) {
-    durasiLemburMax.value = 7
-  }
   karyawan.display.value = `${terpilih.nik || viewStrings.nikDefault} - ${terpilih.name || viewStrings.namaKaryawanDefault}`
   isKaryawanInvalid.value = false
   jabatan.value = terpilih.jabatan
   if (!jabatan.value) {
     errorMessage.value = viewStrings.jabatanErrorMessage
   }
+  shift.value = terpilih.shift
+  shiftMulai.value = terpilih.shift_start
+  shiftSelesai.value = terpilih.shift_end
+  inputModels.jamMulaiLembur.value = terpilih.shift_end
 }
 function change(value, id) {
   inputModels[id].value = value
 }
 function changeShiftLembur(value) {
   shiftLembur.value = value
-  const shiftObject = shiftLemburOptions.value.find((shift) => shift.value === value)
-  jamShiftLembur.jamMulai.value = shiftObject?.shift_mulai
-  jamShiftLembur.jamSelesai.value = shiftObject?.shift_selesai
+  const shiftObject = shiftLemburOptions.find((shift) => shift.value === value)
+  jamShiftLembur.jamMulai.value = shiftObject?.shift_start
+  jamShiftLembur.jamSelesai.value = shiftObject?.shift_end
 }
 function invalidate(value, id) {
   invalidInputs[id] = value
@@ -566,16 +500,9 @@ function onFileChanged(e) {
 }
 function dateInputMax() {
   const date = new Date()
-  date.setDate(date.getDate() - 1)
-  return datesService.toDatePickerString(date)
+  return datesService.toDatePickerString(new Date(date.getFullYear(), date.getMonth() + 2, 0))
 }
 function dateInputMin() {
-  const date = new Date()
-  if (date.getDate() < 6) {
-    date.setMonth(date.getMonth() - 3, 1)
-  } else {
-    date.setMonth(date.getMonth() - 2, 1)
-  }
-  return datesService.toDatePickerString(date)
+  return datesService.toDatePickerString()
 }
 </script>
