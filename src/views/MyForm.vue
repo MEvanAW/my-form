@@ -1,284 +1,296 @@
 <template>
-  <div class="mt-3"></div>
-  <div v-if="errorMessage" class="alert alert-danger" role="alert">
-    {{ errorMessage }}
-  </div>
-  <div v-if="displayWarningMessage" class="alert alert-warning" role="alert">
-    {{ displayWarningMessage }}
-  </div>
-  <div class="row mb-2 mx-sm-0">
-    <div class="col-sm me-lg-4">
-      <div class="row mb-2">
-        <label for="toko" class="col-sm-4 col-form-label">Kode Toko</label>
-        <div class="col-sm-8">
-          <SelectInput
-            id="toko"
-            placeholder="Pilih Toko"
-            :required="true"
-            :options="kodeTokoOptions"
-            error-message="Toko wajib dipilih."
-            :validation-toggle="validationToggle"
-            :selected="selectedToko"
-            :disabled="kodeTokoOptions.length === 1"
-            @change="change"
-          />
-        </div>
-      </div>
-      <div class="row mb-2">
-        <label for="karyawan" class="col-sm-4 col-form-label">NIK – Nama Karyawan</label>
-        <div class="col-sm-8">
-          <div class="input-group">
-            <input
-              id="karyawan"
-              class="form-control"
-              :class="{ 'is-invalid': isKaryawanInvalid }"
-              placeholder="Pilih Karyawan"
-              disabled
-              v-model="karyawan.display.value"
-              aria-describedby="karyawanFeedback"
-            />
-            <InfoButton
-              class-prop="z-0"
-              data-bs-toggle="modal"
-              data-bs-target="#cariKaryawanModal"
-              :disabled="!inputModels.toko.value"
-              :title="
-                inputModels.toko.value ? viewStrings.emptyString : viewStrings.cariKaryawanTitle
-              "
-            >
-              Cari
-            </InfoButton>
-          </div>
-          <div v-if="isKaryawanInvalid" id="karyawanFeedback`" class="invalid-feedback d-block">
-            Karyawan wajib dipilih.
-          </div>
-        </div>
-      </div>
-      <div class="row mb-2">
-        <label for="jabatan" class="col-sm-4 col-form-label">Jabatan</label>
-        <div class="col-sm-8">
-          <span id="jabatan" class="input-group-text">{{ jabatan || 'Jabatan' }}</span>
-        </div>
-      </div>
-      <div class="row mb-2">
-        <label for="shift" class="col-sm-4 col-form-label">Shift</label>
-        <div class="col-sm-8">
-          <div class="input-group">
-            <span id="shift" class="input-group-text">{{ shift }}</span>
-          </div>
-        </div>
-      </div>
-      <div class="row mb-2">
-        <label for="jamShift" class="col-sm-4 col-form-label">Jam Shift</label>
-        <div class="col-sm-8">
-          <div id="jamShift" class="input-group">
-            <span class="input-group-text">{{ shiftMulai || viewStrings.jamMulai }}</span>
-            <span class="input-group-text">s/d</span>
-            <span class="input-group-text">{{ shiftSelesai || viewStrings.jamSelesai }}</span>
-          </div>
-        </div>
-      </div>
-      <div class="row mb-2">
-        <label for="tanggalLembur" class="col-sm-4 col-form-label">Tanggal Lembur</label>
-        <div class="col-sm-8">
-          <DateInput
-            id="tanggalLembur"
-            :required="true"
-            errorMessage="Tanggal lembur wajib dipilih."
-            :validation-toggle="validationToggle"
-            :min="dateInputMin()"
-            :max="dateInputMax()"
-            :picked="inputModels.tanggalLembur.value"
-            @change="change"
-          />
-        </div>
-      </div>
-      <div class="row mb-2">
-        <label for="rincianTugas" class="col-sm-4 col-form-label">Rincian Tugas</label>
-        <div class="col-sm-8">
-          <textarea
-            v-model="rincianTugas"
-            id="rincianTugas"
-            class="form-control"
-            rows="3"
-            maxlength="160"
-          ></textarea>
-        </div>
-      </div>
+  <div class="card my-square-card">
+    <div class="card-header">
+      <h1>Form Pengajuan Lembur</h1>
     </div>
-    <div class="col-sm ms-lg-4">
-      <div class="row mb-2">
-        <label for="aturBerdasarkan" class="col-sm-4 col-form-label">Lembur Berdasarkan</label>
-        <div class="col-sm-8">
-          <SelectInput
-            id="aturBerdasarkan"
-            placeholder="Pilih Dasar Pengaturan"
-            :required="true"
-            :options="aturBerdasarkanOptions"
-            error-message="Dasar pengaturan wajib dipilih."
-            :validation-toggle="validationToggle"
-            :disabled="shift?.toUpperCase() === viewStrings.off"
-            :selected="inputModels.aturBerdasarkan.value"
-            @change="change"
-          />
-        </div>
+    <div class="card-body">
+      <div v-if="errorMessage" class="alert alert-danger" role="alert">
+        {{ errorMessage }}
       </div>
-      <div class="card mb-2">
-        <div
-          class="card-body"
-          :class="{
-            'bg-primary': !durasiLemburDisabled,
-            'bg-secondary-subtle': durasiLemburDisabled,
-          }"
-        >
-          <div class="row mb-2">
-            <label
-              for="durasiLembur"
-              class="col-sm-4 col-form-label"
-              :class="{
-                'text-white': !durasiLemburDisabled,
-              }"
-              >Durasi Lembur</label
-            >
-            <div class="col-sm-8">
-              <NumberInput
-                @change="change"
-                :class-prop="!durasiLemburDisabled && isIstirahat ? '' : 'mb-2'"
-                :disabled="durasiLemburDisabled"
-                id="durasiLembur"
-                :max="durasiLemburMax"
-                :value="inputModels.durasiLembur.value"
-              />
-              <div id="durasiLemburFeedback" class="my-invalid-feedback">
-                Shift group 6S dan 6NS tidak boleh lembur melebihi 7 jam.
-              </div>
-            </div>
-          </div>
-          <div class="row">
-            <label
-              for="jamShift"
-              class="col-sm-4 col-form-label"
-              :class="{
-                'text-white': !durasiLemburDisabled,
-              }"
-              >Jam Lembur</label
-            >
-            <div class="col-sm-8">
-              <div id="jamShift" class="input-group">
-                <TimeInput
-                  id="jamMulaiLembur"
-                  :required="!durasiLemburDisabled"
-                  :validation-toggle="validationToggle"
-                  :picked="inputModels.jamMulaiLembur.value"
-                  :disabled="durasiLemburDisabled"
-                  @change="change"
-                  @invalidate="invalidate"
-                />
-                <span class="input-group-text">s/d</span>
-                <TimeInput
-                  id="jamSelesaiLembur"
-                  :required="!durasiLemburDisabled"
-                  :validation-toggle="validationToggle"
-                  :picked="inputModels.jamSelesaiLembur.value"
-                  :disabled="durasiLemburDisabled"
-                  :max="viewStrings.maxTime"
-                  @change="change"
-                  @invalidate="invalidate"
-                />
-              </div>
-              <div
-                v-if="!durasiLemburDisabled && isIstirahat"
-                class="valid-feedback text-white d-block mb-2"
-              >
-                Termasuk 1 jam istirahat
-              </div>
-            </div>
-          </div>
-        </div>
+      <div v-if="displayWarningMessage" class="alert alert-warning" role="alert">
+        {{ displayWarningMessage }}
       </div>
-      <div class="card mb-2">
-        <div
-          class="card-body"
-          :class="{
-            'bg-primary': !shiftLemburDisabled,
-            'bg-secondary-subtle': shiftLemburDisabled,
-          }"
-        >
+      <div class="row mb-2 mx-sm-0">
+        <div class="col-sm me-lg-4">
           <div class="row mb-2">
-            <label
-              for="shiftLembur"
-              class="col-sm-4 col-form-label"
-              :class="{
-                'text-white': !shiftLemburDisabled,
-              }"
-              >Shift Lembur</label
-            >
+            <label for="toko" class="col-sm-4 col-form-label">Kode Toko</label>
             <div class="col-sm-8">
               <SelectInput
-                id="shiftLembur"
-                placeholder="Pilih Shift Lembur"
-                :required="inputModels.aturBerdasarkan.value === aturBerdasarkanEnum.shiftLembur"
-                :options="shiftLemburOptions"
-                error-message="Shift lembur wajib dipilih."
+                id="toko"
+                placeholder="Pilih Toko"
+                :required="true"
+                :options="kodeTokoOptions"
+                error-message="Toko wajib dipilih."
                 :validation-toggle="validationToggle"
-                :selected="shiftLembur"
-                :disabled="shiftLemburDisabled"
-                @change="changeShiftLembur"
+                :selected="selectedToko"
+                :disabled="kodeTokoOptions.length === 1"
+                @change="change"
               />
             </div>
           </div>
-          <div class="row">
-            <label
-              for="jamShiftLembur"
-              class="col-sm-4 col-form-label"
-              :class="{
-                'text-white': !shiftLemburDisabled,
-              }"
-              >Jam Shift Lembur</label
-            >
+          <div class="row mb-2">
+            <label for="karyawan" class="col-sm-4 col-form-label">NIK – Nama Karyawan</label>
             <div class="col-sm-8">
-              <div id="jamShiftLembur" class="input-group">
-                <span class="input-group-text">{{
-                  jamShiftLembur.jamMulai.value || viewStrings.jamMulai
-                }}</span>
-                <span class="input-group-text">s/d</span>
-                <span class="input-group-text">{{
-                  jamShiftLembur.jamSelesai.value || viewStrings.jamSelesai
-                }}</span>
+              <div class="input-group">
+                <input
+                  id="karyawan"
+                  class="form-control"
+                  :class="{ 'is-invalid': isKaryawanInvalid }"
+                  placeholder="Pilih Karyawan"
+                  disabled
+                  v-model="karyawan.display.value"
+                  aria-describedby="karyawanFeedback"
+                />
+                <InfoButton
+                  class-prop="z-0"
+                  data-bs-toggle="modal"
+                  data-bs-target="#cariKaryawanModal"
+                  :disabled="!inputModels.toko.value"
+                  :title="
+                    inputModels.toko.value ? viewStrings.emptyString : viewStrings.cariKaryawanTitle
+                  "
+                >
+                  Cari
+                </InfoButton>
+              </div>
+              <div v-if="isKaryawanInvalid" id="karyawanFeedback`" class="invalid-feedback d-block">
+                Karyawan wajib dipilih.
               </div>
             </div>
           </div>
-        </div>
-      </div>
-      <div class="row mb-2">
-        <div class="col-lg-4">
-          <label for="dokumenPendukung" class="col-form-label">Dokumen Pendukung</label><br />
-          <small class="text-danger"><i>*Max. 1 MB</i></small
-          ><br />
-          <small class="text-danger"><i>*Format file JPEG, JPG, PNG, PDF</i></small>
-        </div>
-        <div class="col-lg-8">
-          <input
-            id="dokumenPendukung"
-            class="form-control"
-            placeholder="Pilih Dokumen Pendukung"
-            type="file"
-            accept="image/png,.jpeg,.jpg,.pdf"
-            aria-describedby="dokumenPendukungFeedback"
-            required
-            @change="onFileChanged"
-          />
-          <div v-if="isFileInvalid" id="dokumenPendukungFeedback`" class="invalid-feedback d-block">
-            {{ fileInvalidMessage }}
+          <div class="row mb-2">
+            <label for="jabatan" class="col-sm-4 col-form-label">Jabatan</label>
+            <div class="col-sm-8">
+              <span id="jabatan" class="input-group-text">{{ jabatan || 'Jabatan' }}</span>
+            </div>
+          </div>
+          <div class="row mb-2">
+            <label for="shift" class="col-sm-4 col-form-label">Shift</label>
+            <div class="col-sm-8">
+              <div class="input-group">
+                <span id="shift" class="input-group-text">{{ shift }}</span>
+              </div>
+            </div>
+          </div>
+          <div class="row mb-2">
+            <label for="jamShift" class="col-sm-4 col-form-label">Jam Shift</label>
+            <div class="col-sm-8">
+              <div id="jamShift" class="input-group">
+                <span class="input-group-text">{{ shiftMulai || viewStrings.jamMulai }}</span>
+                <span class="input-group-text">s/d</span>
+                <span class="input-group-text">{{ shiftSelesai || viewStrings.jamSelesai }}</span>
+              </div>
+            </div>
+          </div>
+          <div class="row mb-2">
+            <label for="tanggalLembur" class="col-sm-4 col-form-label">Tanggal Lembur</label>
+            <div class="col-sm-8">
+              <DateInput
+                id="tanggalLembur"
+                :required="true"
+                errorMessage="Tanggal lembur wajib dipilih."
+                :validation-toggle="validationToggle"
+                :min="dateInputMin()"
+                :max="dateInputMax()"
+                :picked="inputModels.tanggalLembur.value"
+                @change="change"
+              />
+            </div>
+          </div>
+          <div class="row mb-2">
+            <label for="rincianTugas" class="col-sm-4 col-form-label">Rincian Tugas</label>
+            <div class="col-sm-8">
+              <textarea
+                v-model="rincianTugas"
+                id="rincianTugas"
+                class="form-control"
+                rows="3"
+                maxlength="160"
+              ></textarea>
+            </div>
           </div>
         </div>
-      </div>
-      <div class="row mb-2">
-        <div class="col-lg-3"></div>
-        <div class="col-lg-6 d-grid gap-2">
-          <button class="btn btn-success">Ajukan</button>
+        <div class="col-sm ms-lg-4">
+          <div class="row mb-2">
+            <label for="aturBerdasarkan" class="col-sm-4 col-form-label">Lembur Berdasarkan</label>
+            <div class="col-sm-8">
+              <SelectInput
+                id="aturBerdasarkan"
+                placeholder="Pilih Dasar Pengaturan"
+                :required="true"
+                :options="aturBerdasarkanOptions"
+                error-message="Dasar pengaturan wajib dipilih."
+                :validation-toggle="validationToggle"
+                :disabled="shift?.toUpperCase() === viewStrings.off"
+                :selected="inputModels.aturBerdasarkan.value"
+                @change="change"
+              />
+            </div>
+          </div>
+          <div class="card mb-2">
+            <div
+              class="card-body"
+              :class="{
+                'bg-primary': !durasiLemburDisabled,
+                'bg-secondary-subtle': durasiLemburDisabled,
+              }"
+            >
+              <div class="row mb-2">
+                <label
+                  for="durasiLembur"
+                  class="col-sm-4 col-form-label"
+                  :class="{
+                    'text-white': !durasiLemburDisabled,
+                  }"
+                  >Durasi Lembur</label
+                >
+                <div class="col-sm-8">
+                  <NumberInput
+                    @change="change"
+                    :class-prop="!durasiLemburDisabled && isIstirahat ? '' : 'mb-2'"
+                    :disabled="durasiLemburDisabled"
+                    id="durasiLembur"
+                    :max="durasiLemburMax"
+                    :value="inputModels.durasiLembur.value"
+                  />
+                  <div id="durasiLemburFeedback" class="my-invalid-feedback">
+                    Shift group 6S dan 6NS tidak boleh lembur melebihi 7 jam.
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <label
+                  for="jamShift"
+                  class="col-sm-4 col-form-label"
+                  :class="{
+                    'text-white': !durasiLemburDisabled,
+                  }"
+                  >Jam Lembur</label
+                >
+                <div class="col-sm-8">
+                  <div id="jamShift" class="input-group">
+                    <TimeInput
+                      id="jamMulaiLembur"
+                      :required="!durasiLemburDisabled"
+                      :validation-toggle="validationToggle"
+                      :picked="inputModels.jamMulaiLembur.value"
+                      :disabled="durasiLemburDisabled"
+                      @change="change"
+                      @invalidate="invalidate"
+                    />
+                    <span class="input-group-text">s/d</span>
+                    <TimeInput
+                      id="jamSelesaiLembur"
+                      :required="!durasiLemburDisabled"
+                      :validation-toggle="validationToggle"
+                      :picked="inputModels.jamSelesaiLembur.value"
+                      :disabled="durasiLemburDisabled"
+                      :max="viewStrings.maxTime"
+                      @change="change"
+                      @invalidate="invalidate"
+                    />
+                  </div>
+                  <div
+                    v-if="!durasiLemburDisabled && isIstirahat"
+                    class="valid-feedback text-white d-block mb-2"
+                  >
+                    Termasuk 1 jam istirahat
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="card mb-2">
+            <div
+              class="card-body"
+              :class="{
+                'bg-primary': !shiftLemburDisabled,
+                'bg-secondary-subtle': shiftLemburDisabled,
+              }"
+            >
+              <div class="row mb-2">
+                <label
+                  for="shiftLembur"
+                  class="col-sm-4 col-form-label"
+                  :class="{
+                    'text-white': !shiftLemburDisabled,
+                  }"
+                  >Shift Lembur</label
+                >
+                <div class="col-sm-8">
+                  <SelectInput
+                    id="shiftLembur"
+                    placeholder="Pilih Shift Lembur"
+                    :required="
+                      inputModels.aturBerdasarkan.value === aturBerdasarkanEnum.shiftLembur
+                    "
+                    :options="shiftLemburOptions"
+                    error-message="Shift lembur wajib dipilih."
+                    :validation-toggle="validationToggle"
+                    :selected="shiftLembur"
+                    :disabled="shiftLemburDisabled"
+                    @change="changeShiftLembur"
+                  />
+                </div>
+              </div>
+              <div class="row">
+                <label
+                  for="jamShiftLembur"
+                  class="col-sm-4 col-form-label"
+                  :class="{
+                    'text-white': !shiftLemburDisabled,
+                  }"
+                  >Jam Shift Lembur</label
+                >
+                <div class="col-sm-8">
+                  <div id="jamShiftLembur" class="input-group">
+                    <span class="input-group-text">{{
+                      jamShiftLembur.jamMulai.value || viewStrings.jamMulai
+                    }}</span>
+                    <span class="input-group-text">s/d</span>
+                    <span class="input-group-text">{{
+                      jamShiftLembur.jamSelesai.value || viewStrings.jamSelesai
+                    }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="row mb-2">
+            <div class="col-lg-4">
+              <label for="dokumenPendukung" class="col-form-label">Dokumen Pendukung</label><br />
+              <small class="text-danger"><i>*Max. 1 MB</i></small
+              ><br />
+              <small class="text-danger"><i>*Format file JPEG, JPG, PNG, PDF</i></small>
+            </div>
+            <div class="col-lg-8">
+              <input
+                id="dokumenPendukung"
+                class="form-control"
+                placeholder="Pilih Dokumen Pendukung"
+                type="file"
+                accept="image/png,.jpeg,.jpg,.pdf"
+                aria-describedby="dokumenPendukungFeedback"
+                required
+                @change="onFileChanged"
+              />
+              <div
+                v-if="isFileInvalid"
+                id="dokumenPendukungFeedback`"
+                class="invalid-feedback d-block"
+              >
+                {{ fileInvalidMessage }}
+              </div>
+            </div>
+          </div>
+          <div class="row mb-2">
+            <div class="col-lg-3"></div>
+            <div class="col-lg-6 d-grid gap-2">
+              <button class="btn btn-success">Ajukan</button>
+            </div>
+            <div class="col-lg-3"></div>
+          </div>
         </div>
-        <div class="col-lg-3"></div>
       </div>
     </div>
   </div>
@@ -506,3 +518,9 @@ function dateInputMin() {
   return datesService.toDatePickerString()
 }
 </script>
+
+<style>
+.my-square-card {
+  border-radius: 0;
+}
+</style>
