@@ -1,14 +1,23 @@
-# my-form
+# My Form
+<b>My Form</b> is a front end project created using Vue 3 JavaScript composition API and Bootstrap 5.3. It features reactivity and responsiveness when filling an overtime form.
 
-This template should help get you started developing with Vue 3 in Vite.
+## Contents
 
-## Recommended IDE Setup
+- [Screenshot](#screenshot)
+    - [The Form](#the-form)
+    - [Search Employee Modal](#search-employee-modal)
+- [Project Setup](#project-setup)
 
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+## Screenshot
 
-## Customize configuration
+### The Form
 
-See [Vite Configuration Reference](https://vite.dev/config/).
+![Empty Form](screenshots/Form%20Kosong.png)
+![Filled Form](screenshots/Form%20Terisi.png)
+
+### Search Employee Modal
+
+![Search Employee Modal](screenshots/Modal%20Cari%20Karyawan.png)
 
 ## Project Setup
 
