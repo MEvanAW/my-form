@@ -1,7 +1,25 @@
 <template>
   <div class="card my-square-card">
-    <div class="card-header">
-      <h1>Form Pengajuan Lembur</h1>
+    <div class="card-header container-fluid">
+      <div class="col px-0">
+        <h1>{{ $t('title.myForm') }}</h1>
+      </div>
+      <div class="d-none d-md-block col px-0 position-relative">
+        <div class="pb-2 me-3 position-absolute top-50 end-0 translate-middle-y">
+          <label class="d-inline-block mb-5 fs-5 me-2">Bahasa Indonesia</label>
+          <div class="d-inline-block mb-5 form-check form-switch fs-5">
+            <input v-model="isEnglish" class="form-check-input" type="checkbox" role="switch" id="localeSwitch">
+            <label class="form-check-label" for="localeSwitch">English</label>
+          </div>
+        </div>
+      </div>
+      <div class="d-block d-md-none col px-0">
+        <label class="d-inline-block fs-5 me-2">Bahasa Indonesia</label>
+        <div class="d-inline-block form-check form-switch fs-5">
+          <input v-model="isEnglish" class="form-check-input" type="checkbox" role="switch" id="localeSwitch">
+          <label class="form-check-label" for="localeSwitch">English</label>
+        </div>
+      </div>
     </div>
     <div class="card-body">
       <div v-if="errorMessage" class="alert alert-danger" role="alert">
@@ -13,14 +31,14 @@
       <div class="row mb-2 mx-sm-0">
         <div class="col-sm me-lg-4">
           <div class="row mb-2">
-            <label for="toko" class="col-sm-4 col-form-label">Kode Toko</label>
+            <label for="toko" class="col-sm-4 col-form-label">{{ $t('label.toko') }}</label>
             <div class="col-sm-8">
               <SelectInput
                 id="toko"
-                placeholder="Pilih Toko"
+                :placeholder="$t('placeholder.toko')"
                 :required="true"
                 :options="kodeTokoOptions"
-                error-message="Toko wajib dipilih."
+                :error-message="$t('message.tokoRequired')"
                 :validation-toggle="validationToggle"
                 :selected="selectedToko"
                 :disabled="kodeTokoOptions.length === 1"
@@ -29,14 +47,14 @@
             </div>
           </div>
           <div class="row mb-2">
-            <label for="karyawan" class="col-sm-4 col-form-label">NIK – Nama Karyawan</label>
+            <label for="karyawan" class="col-sm-4 col-form-label">{{ $t('label.karyawan') }}</label>
             <div class="col-sm-8">
               <div class="input-group">
                 <input
                   id="karyawan"
                   class="form-control"
                   :class="{ 'is-invalid': isKaryawanInvalid }"
-                  placeholder="Pilih Karyawan"
+                  :placeholder="$t('placeholder.karyawan')"
                   disabled
                   v-model="karyawan.display.value"
                   aria-describedby="karyawanFeedback"
@@ -50,22 +68,22 @@
                     inputModels.toko.value ? viewStrings.emptyString : viewStrings.cariKaryawanTitle
                   "
                 >
-                  Cari
+                  {{ $t('button.pilih') }}
                 </InfoButton>
               </div>
               <div v-if="isKaryawanInvalid" id="karyawanFeedback`" class="invalid-feedback d-block">
-                Karyawan wajib dipilih.
+                {{ $t('message.karyawanRequired') }}
               </div>
             </div>
           </div>
           <div class="row mb-2">
-            <label for="jabatan" class="col-sm-4 col-form-label">Jabatan</label>
+            <label for="jabatan" class="col-sm-4 col-form-label">{{ $t('label.jabatan') }}</label>
             <div class="col-sm-8">
-              <span id="jabatan" class="input-group-text">{{ jabatan || 'Jabatan' }}</span>
+              <span id="jabatan" class="input-group-text">{{ jabatan || $t('label.jabatan') }}</span>
             </div>
           </div>
           <div class="row mb-2">
-            <label for="shift" class="col-sm-4 col-form-label">Shift</label>
+            <label for="shift" class="col-sm-4 col-form-label">{{ $t('label.shift') }}</label>
             <div class="col-sm-8">
               <div class="input-group">
                 <span id="shift" class="input-group-text">{{ shift }}</span>
@@ -73,22 +91,22 @@
             </div>
           </div>
           <div class="row mb-2">
-            <label for="jamShift" class="col-sm-4 col-form-label">Jam Shift</label>
+            <label for="jamShift" class="col-sm-4 col-form-label">{{ $t('label.jamShift') }}</label>
             <div class="col-sm-8">
               <div id="jamShift" class="input-group">
-                <span class="input-group-text">{{ shiftMulai || viewStrings.jamMulai }}</span>
+                <span class="input-group-text">{{ shiftMulai || $t('label.jamMulai') }}</span>
                 <span class="input-group-text">s/d</span>
-                <span class="input-group-text">{{ shiftSelesai || viewStrings.jamSelesai }}</span>
+                <span class="input-group-text">{{ shiftSelesai || $t('label.jamSelesai') }}</span>
               </div>
             </div>
           </div>
           <div class="row mb-2">
-            <label for="tanggalLembur" class="col-sm-4 col-form-label">Tanggal Lembur</label>
+            <label for="tanggalLembur" class="col-sm-4 col-form-label">{{ $t('label.tanggalLembur') }}</label>
             <div class="col-sm-8">
               <DateInput
                 id="tanggalLembur"
                 :required="true"
-                errorMessage="Tanggal lembur wajib dipilih."
+                :errorMessage="$t('message.karyawanRequired')"
                 :validation-toggle="validationToggle"
                 :min="dateInputMin()"
                 :max="dateInputMax()"
@@ -98,7 +116,7 @@
             </div>
           </div>
           <div class="row mb-2">
-            <label for="rincianTugas" class="col-sm-4 col-form-label">Rincian Tugas</label>
+            <label for="rincianTugas" class="col-sm-4 col-form-label">{{ $t('label.rincianTugas') }}</label>
             <div class="col-sm-8">
               <textarea
                 v-model="rincianTugas"
@@ -112,14 +130,14 @@
         </div>
         <div class="col-sm ms-lg-4">
           <div class="row mb-2">
-            <label for="aturBerdasarkan" class="col-sm-4 col-form-label">Lembur Berdasarkan</label>
+            <label for="aturBerdasarkan" class="col-sm-4 col-form-label">{{ $t('label.lemburBerdasarkan') }}</label>
             <div class="col-sm-8">
               <SelectInput
                 id="aturBerdasarkan"
-                placeholder="Pilih Dasar Pengaturan"
+                :placeholder="$t('placeholder.lemburBerdasarkan')"
                 :required="true"
                 :options="aturBerdasarkanOptions"
-                error-message="Dasar pengaturan wajib dipilih."
+                :error-message="$t('message.lemburBerdasarkanRequired')"
                 :validation-toggle="validationToggle"
                 :disabled="shift?.toUpperCase() === viewStrings.off"
                 :selected="inputModels.aturBerdasarkan.value"
@@ -142,7 +160,7 @@
                   :class="{
                     'text-white': !durasiLemburDisabled,
                   }"
-                  >Durasi Lembur</label
+                  >{{ $t('label.durasiLembur') }}</label
                 >
                 <div class="col-sm-8">
                   <NumberInput
@@ -153,9 +171,6 @@
                     :max="durasiLemburMax"
                     :value="inputModels.durasiLembur.value"
                   />
-                  <div id="durasiLemburFeedback" class="my-invalid-feedback">
-                    Shift group 6S dan 6NS tidak boleh lembur melebihi 7 jam.
-                  </div>
                 </div>
               </div>
               <div class="row">
@@ -165,7 +180,7 @@
                   :class="{
                     'text-white': !durasiLemburDisabled,
                   }"
-                  >Jam Lembur</label
+                  >{{ $t('label.jamLembur') }}</label
                 >
                 <div class="col-sm-8">
                   <div id="jamShift" class="input-group">
@@ -178,7 +193,7 @@
                       @change="change"
                       @invalidate="invalidate"
                     />
-                    <span class="input-group-text">s/d</span>
+                    <span class="input-group-text">{{ $t('label.until') }}</span>
                     <TimeInput
                       id="jamSelesaiLembur"
                       :required="!durasiLemburDisabled"
@@ -194,7 +209,7 @@
                     v-if="!durasiLemburDisabled && isIstirahat"
                     class="valid-feedback text-white d-block mb-2"
                   >
-                    Termasuk 1 jam istirahat
+                    {{ $t('message.jamIstirahat') }}
                   </div>
                 </div>
               </div>
@@ -215,17 +230,17 @@
                   :class="{
                     'text-white': !shiftLemburDisabled,
                   }"
-                  >Shift Lembur</label
+                  >{{ $t('label.shiftLembur') }}</label
                 >
                 <div class="col-sm-8">
                   <SelectInput
                     id="shiftLembur"
-                    placeholder="Pilih Shift Lembur"
+                    :placeholder="$t('placeholder.shiftLembur')"
                     :required="
                       inputModels.aturBerdasarkan.value === aturBerdasarkanEnum.shiftLembur
                     "
                     :options="shiftLemburOptions"
-                    error-message="Shift lembur wajib dipilih."
+                    :error-message="$t('message.shiftLemburRequired')"
                     :validation-toggle="validationToggle"
                     :selected="shiftLembur"
                     :disabled="shiftLemburDisabled"
@@ -240,16 +255,16 @@
                   :class="{
                     'text-white': !shiftLemburDisabled,
                   }"
-                  >Jam Shift Lembur</label
+                  >{{ $t('label.jamLembur') }}</label
                 >
                 <div class="col-sm-8">
                   <div id="jamShiftLembur" class="input-group">
                     <span class="input-group-text">{{
-                      jamShiftLembur.jamMulai.value || viewStrings.jamMulai
+                      jamShiftLembur.jamMulai.value || $t('label.jamMulai')
                     }}</span>
                     <span class="input-group-text">s/d</span>
                     <span class="input-group-text">{{
-                      jamShiftLembur.jamSelesai.value || viewStrings.jamSelesai
+                      jamShiftLembur.jamSelesai.value || $t('label.jamSelesai')
                     }}</span>
                   </div>
                 </div>
@@ -258,16 +273,16 @@
           </div>
           <div class="row mb-2">
             <div class="col-lg-4">
-              <label for="dokumenPendukung" class="col-form-label">Dokumen Pendukung</label><br />
+              <label for="dokumenPendukung" class="col-form-label">{{ $t('label.dokumen') }}</label><br />
               <small class="text-danger"><i>*Max. 1 MB</i></small
               ><br />
-              <small class="text-danger"><i>*Format file JPEG, JPG, PNG, PDF</i></small>
+              <small class="text-danger"><i>{{ $t('message.fileFormat') }}</i></small>
             </div>
             <div class="col-lg-8">
               <input
                 id="dokumenPendukung"
                 class="form-control"
-                placeholder="Pilih Dokumen Pendukung"
+                :placeholder="$t('placeholder.dokumen')"
                 type="file"
                 accept="image/png,.jpeg,.jpg,.pdf"
                 aria-describedby="dokumenPendukungFeedback"
@@ -286,7 +301,7 @@
           <div class="row mb-2">
             <div class="col-lg-3"></div>
             <div class="col-lg-6 d-grid gap-2">
-              <button class="btn btn-success">Ajukan</button>
+              <button class="btn btn-success">{{ $t('button.ajukan') }}</button>
             </div>
             <div class="col-lg-3"></div>
           </div>
@@ -318,6 +333,7 @@ import SelectInput from '@/components/inputs/SelectInput.vue'
 import { strings } from '@/models/strings'
 import TimeInput from '@/components/inputs/TimeInput.vue'
 import { timesService } from '@/services/times'
+import { useI18n } from 'vue-i18n';
 
 const aturBerdasarkanEnum = Object.freeze({
   durasiLembur: Symbol(1),
@@ -327,14 +343,14 @@ const viewStrings = Object.freeze({
   cariKaryawanTitle: 'Silakan pilih kode toko terlebih dahulu.',
   durasiLembur: 'Durasi',
   emptyString: strings.emptyString,
+  en: 'en',
   enam: '6',
   fileMax1Mb: 'File tidak boleh melebihi 1 MB.',
   formatFileTidakDidukung: 'Format file tidak didukung.',
+  id: 'id',
   idGroupShift: 'ID Group Shift',
   jabatanErrorMessage: 'Mohon maaf, gagal mengisi data jabatan. Mohon laporkan ke pengembang.',
-  jamMulai: 'Jam Mulai',
   jamNol: '00:00:00',
-  jamSelesai: 'Jam Selesai',
   lima: '5',
   maxTime: '23:59:59',
   namaKaryawanDefault: 'Nama karyawan tak terbaca',
@@ -342,7 +358,7 @@ const viewStrings = Object.freeze({
   shift: 'Shift',
   off: 'OFF',
 })
-const emptyArray = Object.freeze([])
+// const emptyArray = Object.freeze([])
 const supportedFileTypes = Object.freeze(['image/png', 'image/jpeg', 'application/pdf'])
 
 const employees = [
@@ -364,6 +380,8 @@ const employees = [
   },
 ]
 const errorMessage = ref('')
+const isEnglish = ref(false)
+const { locale } = useI18n({ useScope: 'global' });
 const warningMessage = ref(viewStrings.emptyString)
 const selectedToko = ref('')
 const durasiLemburMax = ref(8)
@@ -448,6 +466,13 @@ const aturBerdasarkanOptions = computed(() => {
 })
 const displayWarningMessage = computed(() => warningMessage.value || viewStrings.emptyString)
 
+watch(isEnglish, (newIsEnglish) => {
+  if (newIsEnglish) {
+    locale.value = viewStrings.en
+  } else {
+    locale.value = viewStrings.id
+  }
+})
 watch(shiftLemburDisabled, (newShiftLemburDisabled) => {
   if (newShiftLemburDisabled) {
     shiftLembur.value = viewStrings.emptyString

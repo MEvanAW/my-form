@@ -9,7 +9,7 @@
     <div class="modal-dialog modal-lg">
       <div class="modal-content">
         <div class="modal-header">
-          <h1 class="modal-title fs-5" id="modalLabel">Cari NIK/Nama Karyawan</h1>
+          <h1 class="modal-title fs-5" id="modalLabel">{{ $t('title.cariKaryawanModal') }}</h1>
           <button
             type="button"
             class="btn-close"
@@ -37,7 +37,7 @@
                   min="5"
                 />
                 <button class="btn btn-primary text-light" type="button" @click="cari(nikForCari)">
-                  Cari
+                  {{ $t('placeholder.cari') }}
                 </button>
               </div>
             </div>
@@ -46,7 +46,7 @@
             <div class="col-sm-7"></div>
             <div class="col-12 col-sm-5">
               <div class="input-group ms-auto">
-                <input v-model="searchKeyword" class="form-control" placeholder="Cari" />
+                <input v-model="searchKeyword" class="form-control" :placeholder="$t('placeholder.cari')" />
                 <button class="btn btn-outline-secondary icon-link" type="button">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -70,12 +70,12 @@
                 <tr class="table-dark text-center">
                   <th scope="col" style="width: 73px"></th>
                   <th scope="col" class="my-position-md-relative" @click="sortByNik()">
-                    NIK
+                    {{ $t('label.nik') }}
                     <SortNumericAscending v-if="sortBy == sortByEnum.nikAscending" />
                     <SortNumericDescending v-else-if="sortBy == sortByEnum.nikDescending" />
                   </th>
                   <th scope="col" class="my-position-md-relative" @click="sortByNama()">
-                    NAMA
+                    {{ $t('label.nama') }}
                     <SortAlphabetAscending v-if="sortBy == sortByEnum.namaAscending" />
                     <SortAlphabetDescending v-else-if="sortBy == sortByEnum.namaDescending" />
                   </th>
@@ -85,12 +85,12 @@
                     class="my-position-md-relative"
                     @click="sortByJabatan()"
                   >
-                    JABATAN
+                    {{ $t('column.jabatan') }}
                     <SortAlphabetAscending v-if="sortBy == sortByEnum.jabatanAscending" />
                     <SortAlphabetDescending v-else-if="sortBy == sortByEnum.jabatanDescending" />
                   </th>
                   <th scope="col" class="my-position-md-relative" @click="sortByShift()">
-                    SHIFT
+                    {{ $t('column.shift') }}
                     <SortAlphabetAscending v-if="sortBy === fieldKeys.shift && isAscending" />
                     <SortAlphabetDescending v-else-if="sortBy === fieldKeys.shift" />
                   </th>
@@ -105,7 +105,7 @@
                       data-bs-dismiss="modal"
                       @click="pilih(karyawan)"
                     >
-                      Pilih
+                      {{ $t('button.pilih') }}
                     </button>
                   </th>
                   <td class="text-center">{{ karyawan.nik }}</td>
@@ -119,7 +119,7 @@
           <div class="row">
             <div class="col-sm my-position-sm-relative mb-3 mb-sm-0">
               <div class="my-y-center">
-                Show
+                {{ $t('label.lihat') }}
                 <input
                   type="number"
                   v-model="showInput"
@@ -128,7 +128,7 @@
                   class="my-form-control"
                   :class="{ 'is-invalid': showIsInvalid }"
                 />
-                of <b>{{ max }}</b> entries
+                {{ $t('label.dari') }} <b>{{ max }}</b> entries
               </div>
             </div>
             <MyPagination :page-count="pageCount" :symbol="symbol" @navigate="navigate" />
