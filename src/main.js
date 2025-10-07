@@ -16,11 +16,11 @@ const i18n = createI18n({
     id: {
       button: {
         ajukan: 'Ajukan',
-        pilih: 'Pilih'
+        pilih: 'Pilih',
       },
       column: {
         jabatan: '@.upper:label.jabatan',
-        shift: '@.upper:label.shift'
+        shift: '@.upper:label.shift',
       },
       placeholder: {
         cari: 'Cari',
@@ -28,11 +28,11 @@ const i18n = createI18n({
         lemburBerdasarkan: 'Pilih Dasar Pengaturan',
         shiftLembur: 'Pilih Shift Lembur',
         toko: 'Pilih Toko',
-        karyawan: 'Pilih Karyawan'
+        karyawan: 'Pilih Karyawan',
       },
       title: {
         cariKaryawanModal: 'Cari NIK/Nama Karyawan',
-        myForm: 'Form Pengajuan Lembur'
+        myForm: 'Form Pengajuan Lembur',
       },
       label: {
         dari: 'dari',
@@ -53,7 +53,7 @@ const i18n = createI18n({
         tanggalLembur: 'Tanggal Lembur',
         toko: 'Toko',
         until: 's/d',
-        karyawan: 'NIK – Nama Karyawan'
+        karyawan: 'NIK – Nama Karyawan',
       },
       message: {
         fileFormat: '*Format file JPEG, JPG, PNG, PDF',
@@ -61,18 +61,19 @@ const i18n = createI18n({
         lemburBerdasarkanRequired: 'Dasar pengaturan wajib dipilih.',
         shiftLemburRequired: 'Shift lembur wajib dipilih.',
         tanggalLemburRequired: 'Tanggal lembur wajib dipilih.',
+        tokoPrerequisite: 'Silakan pilih kode toko terlebih dahulu.',
         tokoRequired: 'Toko wajib dipilih.',
-        karyawanRequired: 'Karyawan wajib dipilih.'
-      }
+        karyawanRequired: 'Karyawan wajib dipilih.',
+      },
     },
     en: {
       button: {
         ajukan: 'Submit',
-        pilih: 'Pick'
+        pilih: 'Pick',
       },
       column: {
         jabatan: '@.upper:label.jabatan',
-        shift: '@.upper:label.shift'
+        shift: '@.upper:label.shift',
       },
       placeholder: {
         cari: 'Search',
@@ -80,11 +81,11 @@ const i18n = createI18n({
         lemburBerdasarkan: 'Select Overtime by',
         shiftLembur: 'Select Overtime Shift',
         toko: 'Select Store',
-        karyawan: 'Select Employee'
+        karyawan: 'Select Employee',
       },
       title: {
         cariKaryawanModal: 'Search Employee ID/Name',
-        myForm: 'Overtime Request Form'
+        myForm: 'Overtime Request Form',
       },
       label: {
         dari: 'of',
@@ -105,7 +106,7 @@ const i18n = createI18n({
         tanggalLembur: 'Overtime Date',
         toko: 'Store',
         until: 'until',
-        karyawan: 'ID – Employee Name'
+        karyawan: 'ID – Employee Name',
       },
       message: {
         fileFormat: '*File formats JPEG, JPG, PNG, PDF',
@@ -113,11 +114,12 @@ const i18n = createI18n({
         lemburBerdasarkanRequired: 'Overtime by is required.',
         shiftLemburRequired: 'Overtime shift is required.',
         tanggalLemburRequired: 'Overtime date is required.',
+        tokoPrerequisite: 'Select a store first.',
         tokoRequired: 'Store is required.',
-        karyawanRequired: 'Employee is required.'
-      }
-    }
-  }
+        karyawanRequired: 'Employee is required.',
+      },
+    },
+  },
 })
 
 app.use(createPinia())

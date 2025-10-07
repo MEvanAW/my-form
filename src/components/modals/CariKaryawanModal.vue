@@ -46,7 +46,11 @@
             <div class="col-sm-7"></div>
             <div class="col-12 col-sm-5">
               <div class="input-group ms-auto">
-                <input v-model="searchKeyword" class="form-control" :placeholder="$t('placeholder.cari')" />
+                <input
+                  v-model="searchKeyword"
+                  class="form-control"
+                  :placeholder="$t('placeholder.cari')"
+                />
                 <button class="btn btn-outline-secondary icon-link" type="button">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"

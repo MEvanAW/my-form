@@ -8,7 +8,13 @@
         <div class="pb-2 me-3 position-absolute top-50 end-0 translate-middle-y">
           <label class="d-inline-block mb-5 fs-5 me-2">Bahasa Indonesia</label>
           <div class="d-inline-block mb-5 form-check form-switch fs-5">
-            <input v-model="isEnglish" class="form-check-input" type="checkbox" role="switch" id="localeSwitch">
+            <input
+              v-model="isEnglish"
+              class="form-check-input"
+              type="checkbox"
+              role="switch"
+              id="localeSwitch"
+            />
             <label class="form-check-label" for="localeSwitch">English</label>
           </div>
         </div>
@@ -16,7 +22,13 @@
       <div class="d-block d-md-none col px-0">
         <label class="d-inline-block fs-5 me-2">Bahasa Indonesia</label>
         <div class="d-inline-block form-check form-switch fs-5">
-          <input v-model="isEnglish" class="form-check-input" type="checkbox" role="switch" id="localeSwitch">
+          <input
+            v-model="isEnglish"
+            class="form-check-input"
+            type="checkbox"
+            role="switch"
+            id="localeSwitch"
+          />
           <label class="form-check-label" for="localeSwitch">English</label>
         </div>
       </div>
@@ -65,7 +77,9 @@
                   data-bs-target="#cariKaryawanModal"
                   :disabled="!inputModels.toko.value"
                   :title="
-                    inputModels.toko.value ? viewStrings.emptyString : viewStrings.cariKaryawanTitle
+                    inputModels.toko.value
+                      ? viewStrings.emptyString
+                      : $t('message.tokoPrerequisite')
                   "
                 >
                   {{ $t('button.pilih') }}
@@ -79,7 +93,9 @@
           <div class="row mb-2">
             <label for="jabatan" class="col-sm-4 col-form-label">{{ $t('label.jabatan') }}</label>
             <div class="col-sm-8">
-              <span id="jabatan" class="input-group-text">{{ jabatan || $t('label.jabatan') }}</span>
+              <span id="jabatan" class="input-group-text">{{
+                jabatan || $t('label.jabatan')
+              }}</span>
             </div>
           </div>
           <div class="row mb-2">
@@ -95,13 +111,15 @@
             <div class="col-sm-8">
               <div id="jamShift" class="input-group">
                 <span class="input-group-text">{{ shiftMulai || $t('label.jamMulai') }}</span>
-                <span class="input-group-text">s/d</span>
+                <span class="input-group-text">{{ $t('label.until') }}</span>
                 <span class="input-group-text">{{ shiftSelesai || $t('label.jamSelesai') }}</span>
               </div>
             </div>
           </div>
           <div class="row mb-2">
-            <label for="tanggalLembur" class="col-sm-4 col-form-label">{{ $t('label.tanggalLembur') }}</label>
+            <label for="tanggalLembur" class="col-sm-4 col-form-label">{{
+              $t('label.tanggalLembur')
+            }}</label>
             <div class="col-sm-8">
               <DateInput
                 id="tanggalLembur"
@@ -116,7 +134,9 @@
             </div>
           </div>
           <div class="row mb-2">
-            <label for="rincianTugas" class="col-sm-4 col-form-label">{{ $t('label.rincianTugas') }}</label>
+            <label for="rincianTugas" class="col-sm-4 col-form-label">{{
+              $t('label.rincianTugas')
+            }}</label>
             <div class="col-sm-8">
               <textarea
                 v-model="rincianTugas"
@@ -130,7 +150,9 @@
         </div>
         <div class="col-sm ms-lg-4">
           <div class="row mb-2">
-            <label for="aturBerdasarkan" class="col-sm-4 col-form-label">{{ $t('label.lemburBerdasarkan') }}</label>
+            <label for="aturBerdasarkan" class="col-sm-4 col-form-label">{{
+              $t('label.lemburBerdasarkan')
+            }}</label>
             <div class="col-sm-8">
               <SelectInput
                 id="aturBerdasarkan"
@@ -262,7 +284,7 @@
                     <span class="input-group-text">{{
                       jamShiftLembur.jamMulai.value || $t('label.jamMulai')
                     }}</span>
-                    <span class="input-group-text">s/d</span>
+                    <span class="input-group-text">{{ $t('label.until') }}</span>
                     <span class="input-group-text">{{
                       jamShiftLembur.jamSelesai.value || $t('label.jamSelesai')
                     }}</span>
@@ -273,10 +295,13 @@
           </div>
           <div class="row mb-2">
             <div class="col-lg-4">
-              <label for="dokumenPendukung" class="col-form-label">{{ $t('label.dokumen') }}</label><br />
+              <label for="dokumenPendukung" class="col-form-label">{{ $t('label.dokumen') }}</label
+              ><br />
               <small class="text-danger"><i>*Max. 1 MB</i></small
               ><br />
-              <small class="text-danger"><i>{{ $t('message.fileFormat') }}</i></small>
+              <small class="text-danger"
+                ><i>{{ $t('message.fileFormat') }}</i></small
+              >
             </div>
             <div class="col-lg-8">
               <input
@@ -333,14 +358,13 @@ import SelectInput from '@/components/inputs/SelectInput.vue'
 import { strings } from '@/models/strings'
 import TimeInput from '@/components/inputs/TimeInput.vue'
 import { timesService } from '@/services/times'
-import { useI18n } from 'vue-i18n';
+import { useI18n } from 'vue-i18n'
 
 const aturBerdasarkanEnum = Object.freeze({
   durasiLembur: Symbol(1),
   shiftLembur: Symbol(2),
 })
 const viewStrings = Object.freeze({
-  cariKaryawanTitle: 'Silakan pilih kode toko terlebih dahulu.',
   durasiLembur: 'Durasi',
   emptyString: strings.emptyString,
   en: 'en',
@@ -381,7 +405,7 @@ const employees = [
 ]
 const errorMessage = ref('')
 const isEnglish = ref(false)
-const { locale } = useI18n({ useScope: 'global' });
+const { locale } = useI18n({ useScope: 'global' })
 const warningMessage = ref(viewStrings.emptyString)
 const selectedToko = ref('')
 const durasiLemburMax = ref(8)
