@@ -22,7 +22,6 @@
 </template>
 
 <script setup>
-import { strings } from '@/models/strings'
 import { onMounted, ref, watch } from 'vue'
 
 const props = defineProps({
@@ -36,13 +35,12 @@ const props = defineProps({
   classProp: String,
   min: null,
   max: null,
-  picked: null,
   disabled: Boolean,
 })
 const emit = defineEmits(['change', 'invalidate'])
 
 const isInvalid = 'is-invalid'
-const model = ref('')
+const model = defineModel()
 const inputClass = ref({
   'is-invalid': false,
 })
@@ -75,14 +73,6 @@ watch(
   (_) => {
     if (props.required && !model.value) {
       inputClass.value[isInvalid] = true
-    }
-  },
-)
-watch(
-  () => props.picked,
-  (newPicked) => {
-    if (newPicked || newPicked === strings.emptyString) {
-      model.value = newPicked
     }
   },
 )

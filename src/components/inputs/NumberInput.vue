@@ -36,14 +36,14 @@ const {
   disabled: Boolean,
   id: String,
   max: Number,
-  min: Number,
-  value: Number,
+  min: Number
 })
 const emit = defineEmits(['change'])
 
 const emptyString = ''
 const isInvalid = ref(false)
-const model = ref(1)
+const model = defineModel()
+model.value = 1
 
 watch(model, (newModel) => {
   if (newModel < min) {
@@ -59,14 +59,6 @@ watch(
   (newMax) => {
     if (model.value > newMax) {
       isInvalid.value = true
-    }
-  },
-)
-watch(
-  () => props.value,
-  (newValue) => {
-    if (newValue || newValue === '') {
-      model.value = newValue
     }
   },
 )

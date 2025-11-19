@@ -51,8 +51,8 @@
                 :required="true"
                 :options="kodeTokoOptions"
                 :error-message="$t('message.tokoRequired')"
+                v-model="selectedToko"
                 :validation-toggle="validationToggle"
-                :selected="selectedToko"
                 :disabled="kodeTokoOptions.length === 1"
                 @change="change"
               />
@@ -160,9 +160,9 @@
                 :required="true"
                 :options="aturBerdasarkanOptions"
                 :error-message="$t('message.lemburBerdasarkanRequired')"
+                v-model="inputModels.aturBerdasarkan.value"
                 :validation-toggle="validationToggle"
                 :disabled="shift?.toUpperCase() === viewStrings.off"
-                :selected="inputModels.aturBerdasarkan.value"
                 @change="change"
               />
             </div>
@@ -186,12 +186,11 @@
                 >
                 <div class="col-sm-8">
                   <NumberInput
-                    @change="change"
                     :class-prop="!durasiLemburDisabled && isIstirahat ? '' : 'mb-2'"
                     :disabled="durasiLemburDisabled"
                     id="durasiLembur"
                     :max="durasiLemburMax"
-                    :value="inputModels.durasiLembur.value"
+                    v-model="inputModels.durasiLembur.value"
                   />
                 </div>
               </div>
@@ -209,21 +208,19 @@
                     <TimeInput
                       id="jamMulaiLembur"
                       :required="!durasiLemburDisabled"
+                      v-model="inputModels.jamMulaiLembur.value"
                       :validation-toggle="validationToggle"
-                      :picked="inputModels.jamMulaiLembur.value"
                       :disabled="durasiLemburDisabled"
-                      @change="change"
                       @invalidate="invalidate"
                     />
                     <span class="input-group-text">{{ $t('label.until') }}</span>
                     <TimeInput
                       id="jamSelesaiLembur"
                       :required="!durasiLemburDisabled"
+                      v-model="inputModels.jamSelesaiLembur.value"
                       :validation-toggle="validationToggle"
-                      :picked="inputModels.jamSelesaiLembur.value"
                       :disabled="durasiLemburDisabled"
                       :max="viewStrings.maxTime"
-                      @change="change"
                       @invalidate="invalidate"
                     />
                   </div>
@@ -263,8 +260,8 @@
                     "
                     :options="shiftLemburOptions"
                     :error-message="$t('message.shiftLemburRequired')"
+                    v-model="shiftLembur"
                     :validation-toggle="validationToggle"
-                    :selected="shiftLembur"
                     :disabled="shiftLemburDisabled"
                     @change="changeShiftLembur"
                   />

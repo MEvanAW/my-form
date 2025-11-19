@@ -36,13 +36,12 @@ const props = defineProps({
   errorMessage: String,
   validationToggle: null,
   classProp: String,
-  selected: null,
   disabled: Boolean,
 })
 const emit = defineEmits(['change'])
 
 const isInvalid = 'is-invalid'
-const model = ref('')
+const model = defineModel()
 const inputClass = ref({
   'is-invalid': false,
 })
@@ -50,9 +49,6 @@ const inputClass = ref({
 onMounted(() => {
   if (props.classProp) {
     inputClass.value[props.classProp] = true
-  }
-  if (props.selected) {
-    model.value = props.selected
   }
 })
 
@@ -63,14 +59,6 @@ watchEffect(() => {
   emit('change', model.value, props.id, props.additionalData)
 })
 
-watch(
-  () => props.selected,
-  (newSelected) => {
-    if (newSelected || newSelected === '') {
-      model.value = newSelected
-    }
-  },
-)
 // A workaround to trigger toggle from parent
 watch(
   () => props.validationToggle,
