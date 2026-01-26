@@ -24,7 +24,8 @@
 
 <script setup>
 import '@/assets/css/form.css'
-import { ref, watch } from 'vue'
+import { watch } from 'vue'
+import { useNumberInput } from '@/composables/useNumberInput'
 
 const {
   disabled = false,
@@ -36,43 +37,53 @@ const {
   disabled: Boolean,
   id: String,
   max: Number,
-  min: Number
+  min: Number,
 })
 const emit = defineEmits(['change'])
 
 const emptyString = ''
-const isInvalid = ref(false)
+
+const { value, isInvalid, increment, decrement, clearInvalid, setMin, setMax } = useNumberInput(
+  {
+    min: min,
+    max: max,
+    step: 1,
+    initialValue: 1,
+  },
+  emit,
+)
+
 const model = defineModel()
-model.value = 1
+model.value = value.value
+
+watch(value, (newValue) => {
+  model.value = newValue
+  clearInvalid()
+  emit('change', newValue, props.id)
+})
 
 watch(model, (newModel) => {
-  if (newModel < min) {
-    model.value = min
-  } else if (newModel > max) {
-    model.value = max
+  if (newModel !== value.value) {
+    value.value = newModel
   }
-  isInvalid.value = false
-  emit('change', model.value, props.id)
 })
+
 watch(
   () => max,
   (newMax) => {
-    if (model.value > newMax) {
+    setMax(newMax)
+    if (value.value > newMax) {
       isInvalid.value = true
     }
   },
 )
 
-function decrement() {
-  if (model.value > min) {
-    --model.value
-  }
-}
-function increment() {
-  if (model.value < max) {
-    ++model.value
-  }
-}
+watch(
+  () => min,
+  (newMin) => {
+    setMin(newMin)
+  },
+)
 </script>
 
 <style scoped>

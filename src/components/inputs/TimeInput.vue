@@ -23,6 +23,7 @@
 
 <script setup>
 import { onMounted, ref, watch } from 'vue'
+import { useInputValidation } from '@/composables/useInputValidation'
 
 const props = defineProps({
   id: {
@@ -41,10 +42,9 @@ const emit = defineEmits(['change', 'invalidate'])
 
 const isInvalid = 'is-invalid'
 const model = defineModel()
-const inputClass = ref({
-  'is-invalid': false,
-})
 const displayErrorMessage = ref(props.errorMessage)
+
+const { inputClass } = useInputValidation(props, emit)
 
 onMounted(() => {
   if (props.classProp) {
@@ -65,23 +65,4 @@ watch([model, () => props.disabled], ([newModel, newDisabled]) => {
   }
   emit('change', newModel, props.id)
 })
-
-// A workaround to trigger toggle from parent
-watch(
-  () => props.validationToggle,
-  // eslint-disable-next-line no-unused-vars
-  (_) => {
-    if (props.required && !model.value) {
-      inputClass.value[isInvalid] = true
-    }
-  },
-)
-watch(
-  () => props.required,
-  (newRequired) => {
-    if (!newRequired) {
-      inputClass.value[isInvalid] = false
-    }
-  },
-)
 </script>

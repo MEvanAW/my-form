@@ -47,30 +47,25 @@
 </template>
 
 <script setup>
-import { computed, watch, onMounted } from 'vue'
-import { Modal } from 'bootstrap'
+import { onMounted } from 'vue'
+import { useBootstrapModal } from '@/composables/useBootstrapModal'
 
-let modal = null
 const props = defineProps({
   symbol: null,
   isStatic: Boolean,
 })
 const emit = defineEmits(['konfirmasiBerhasil'])
 
-const dataBsBackdrop = computed(() => (props.isStatic ? 'static' : true))
+const { dataBsBackdrop, initModal, watchForToggle } = useBootstrapModal(
+  'berhasilModal',
+  { isStatic: props.isStatic },
+  emit,
+)
 
 onMounted(() => {
-  modal = new Modal(document.getElementById('berhasilModal'))
+  initModal()
+  watchForToggle(props.symbol)
 })
-
-// A workaround to trigger toggle from parent
-watch(
-  () => props.symbol,
-  // eslint-disable-next-line no-unused-vars
-  (_) => {
-    modal.toggle()
-  },
-)
 
 function konfirmasiBerhasil() {
   emit('konfirmasiBerhasil')

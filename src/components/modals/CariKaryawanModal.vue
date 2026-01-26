@@ -169,6 +169,7 @@ const props = defineProps({
 })
 const emit = defineEmits(['pilih'])
 
+// TODO: refactor to use useTableSorting if and only if applicable
 const errorMessage = ref('')
 const displayWarningMessage = ref(strings.emptyString)
 const employees = ref(emptyArray)
