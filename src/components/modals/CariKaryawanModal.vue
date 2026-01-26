@@ -73,35 +73,35 @@
               <thead>
                 <tr class="table-dark text-center">
                   <th scope="col" style="width: 73px"></th>
-                  <th scope="col" class="my-position-md-relative" @click="sortByNik()">
+                  <th scope="col" class="my-position-md-relative" @click="toggleSort('nik')">
                     {{ $t('label.nik') }}
-                    <SortNumericAscending v-if="sortBy == sortByEnum.nikAscending" />
-                    <SortNumericDescending v-else-if="sortBy == sortByEnum.nikDescending" />
+                    <SortNumericAscending v-if="sortBy === 'nik' && isAscending" />
+                    <SortNumericDescending v-else-if="sortBy === 'nik'" />
                   </th>
-                  <th scope="col" class="my-position-md-relative" @click="sortByNama()">
+                  <th scope="col" class="my-position-md-relative" @click="toggleSort('nama')">
                     {{ $t('label.nama') }}
-                    <SortAlphabetAscending v-if="sortBy == sortByEnum.namaAscending" />
-                    <SortAlphabetDescending v-else-if="sortBy == sortByEnum.namaDescending" />
+                    <SortAlphabetAscending v-if="sortBy === 'nama' && isAscending" />
+                    <SortAlphabetDescending v-else-if="sortBy === 'nama'" />
                   </th>
                   <th
                     v-if="displayJabatan"
                     scope="col"
                     class="my-position-md-relative"
-                    @click="sortByJabatan()"
+                    @click="toggleSort('jabatan')"
                   >
                     {{ $t('column.jabatan') }}
-                    <SortAlphabetAscending v-if="sortBy == sortByEnum.jabatanAscending" />
-                    <SortAlphabetDescending v-else-if="sortBy == sortByEnum.jabatanDescending" />
+                    <SortAlphabetAscending v-if="sortBy === 'jabatan' && isAscending" />
+                    <SortAlphabetDescending v-else-if="sortBy === 'jabatan'" />
                   </th>
-                  <th scope="col" class="my-position-md-relative" @click="sortByShift()">
+                  <th scope="col" class="my-position-md-relative" @click="toggleSort('shift')">
                     {{ $t('column.shift') }}
-                    <SortAlphabetAscending v-if="sortBy === fieldKeys.shift && isAscending" />
-                    <SortAlphabetDescending v-else-if="sortBy === fieldKeys.shift" />
+                    <SortAlphabetAscending v-if="sortBy === 'shift' && isAscending" />
+                    <SortAlphabetDescending v-else-if="sortBy === 'shift'" />
                   </th>
                 </tr>
               </thead>
               <tbody>
-                <tr v-for="karyawan in displayEmployees" :key="karyawan.nik">
+                <tr v-for="karyawan in displayedItems" :key="karyawan.nik">
                   <th scope="row" style="width: 73px">
                     <button
                       class="btn btn-success py-1"
@@ -127,15 +127,15 @@
                 <input
                   type="number"
                   v-model="showInput"
-                  :min="min"
-                  :max="max"
+                  :min="itemsPerPageMin"
+                  :max="itemsPerPageMax"
                   class="my-form-control"
                   :class="{ 'is-invalid': showIsInvalid }"
                 />
-                {{ $t('label.dari') }} <b>{{ max }}</b> entries
+                {{ $t('label.dari') }} <b>{{ itemsPerPageMax }}</b> entries
               </div>
             </div>
-            <MyPagination :page-count="pageCount" :symbol="symbol" @navigate="navigate" />
+            <MyPagination :page-count="pageCount" :symbol="symbol" @navigate="navigateToPage" />
           </div>
         </div>
       </div>
@@ -152,7 +152,7 @@ import SortNumericAscending from '@/components/svg/SortNumericAscending.vue'
 import SortNumericDescending from '@/components/svg/SortNumericDescending.vue'
 import SortAlphabetAscending from '../svg/SortAlphabetAscending.vue'
 import SortAlphabetDescending from '../svg/SortAlphabetDescending.vue'
-import { sortByEnum } from '@/models/sortByEnum'
+import { useTableSorting } from '@/composables/useTableSorting'
 import { strings } from '@/models/strings'
 
 const danger = 'danger'
@@ -169,59 +169,116 @@ const props = defineProps({
 })
 const emit = defineEmits(['pilih'])
 
-// TODO: refactor to use useTableSorting if and only if applicable
 const errorMessage = ref('')
 const displayWarningMessage = ref(strings.emptyString)
-const employees = ref(emptyArray)
-const isAscending = ref(true)
 const nikForCari = ref('')
-const searchKeyword = ref('')
-const displayEmployees = ref(employees.value)
-const sortBy = ref(sortByEnum.nikAscending)
 const alertType = ref(danger)
-const filteredEmployees = computed(() =>
-  employees.value.filter(
-    (karyawan) =>
-      karyawan.name.toLowerCase().includes(searchKeyword.value.toLowerCase()) ||
-      karyawan.nik.includes(searchKeyword.value) ||
-      karyawan?.[fieldKeys.shift]?.includes(searchKeyword.value),
-  ),
-)
-const min = computed(() => Math.min(5, filteredEmployees.value.length || 1))
-const max = computed(() => Math.min(filteredEmployees.value.length, 99))
-const showInput = ref(min.value)
-const validatedShow = ref(min.value)
-const symbol = ref(Symbol(validatedShow.value))
-const pageCount = computed(() => {
-  const ceil = Math.ceil(filteredEmployees.value.length / validatedShow.value)
-  return isNaN(ceil) ? 0 : ceil
-})
 const cariIsInvalid = computed(
   () => !nikForCari.value || !nikForCari.value.length || nikForCari.value.length < 5,
 )
-const showIsInvalid = computed(() => showInput.value < min.value || showInput.value > max.value)
+
+// Table sorting configuration
+const employees = ref(emptyArray)
+const sortFieldKeys = {
+  nik: 'nik',
+  nama: 'name',
+  jabatan: 'jabatan',
+  shift: 'shift',
+}
+
+const sortConfig = {
+  sortFields: {
+    nik: {
+      field: 'nik',
+      compare: (a, b, field) => {
+        // Numeric comparison for NIK
+        const numA = Number(a[field])
+        const numB = Number(b[field])
+        return numA - numB
+      },
+    },
+    nama: {
+      field: 'name',
+      compare: (a, b, field) => {
+        const strA = a[field].toLowerCase()
+        const strB = b[field].toLowerCase()
+        if (strA < strB) return -1
+        if (strA > strB) return 1
+        return 0
+      },
+    },
+    jabatan: {
+      field: 'jabatan',
+      compare: (a, b, field) => {
+        const strA = a[field].toLowerCase()
+        const strB = b[field].toLowerCase()
+        if (strA < strB) return -1
+        if (strA > strB) return 1
+        return 0
+      },
+    },
+    shift: {
+      field: 'shift',
+      compare: (a, b, field) => {
+        const strA = a[field]?.toLowerCase() || ''
+        const strB = b[field]?.toLowerCase() || ''
+        if (strA < strB) return -1
+        if (strA > strB) return 1
+        return 0
+      },
+    },
+  },
+  defaultSortKey: 'nik',
+  initialItemsPerPage: 5,
+  minItemsPerPage: 5,
+  maxItemsPerPage: 99,
+  searchFields: ['name', 'nik', 'shift'],
+}
+
+const {
+  sortBy,
+  isAscending,
+  searchKeyword,
+  itemsPerPage,
+  itemsPerPageMin,
+  itemsPerPageMax,
+  filteredItems,
+  displayedItems,
+  pageCount,
+  toggleSort,
+  navigateToPage,
+  setItemsPerPage,
+  calculateItemsPerPageBounds,
+  isValidItemsPerPage,
+} = useTableSorting(employees, sortConfig)
+
+// Items per page input handling
+const showInput = itemsPerPage
+const symbol = ref(Symbol(itemsPerPage.value))
+
+const showIsInvalid = computed(() => !isValidItemsPerPage(showInput.value))
 
 watch(showInput, (count) => {
   if (!showIsInvalid.value) {
-    validatedShow.value = count
+    setItemsPerPage(count)
     symbol.value = Symbol(count)
   }
 })
-watch(filteredEmployees, (f) => {
-  if (validatedShow.value > f.length) {
-    validatedShow.value = f.length
-    showInput.value = f.length
-  } else if (validatedShow.value < min.value) {
-    validatedShow.value = min.value
-    showInput.value = min.value
+
+watch(filteredItems, (f) => {
+  calculateItemsPerPageBounds(5, 99)
+  if (itemsPerPage.value > f.length) {
+    setItemsPerPage(Math.max(f.length, 5))
+    showInput.value = itemsPerPage.value
   }
 })
+
 watch(
   () => props.employees,
   (newEmployees) => {
     if (newEmployees?.constructor === Array) {
       employees.value = newEmployees
-      navigate(1)
+      navigateToPage(1)
     }
   },
   { immediate: true },
@@ -231,108 +288,10 @@ function cari() {
   if (cariIsInvalid.value) {
     return
   }
-  // To do: logika cari
+  // TODO: logika cari
 }
 function pilih(karyawan) {
   emit('pilih', karyawan, props.emitArg)
-}
-function navigate(page) {
-  if (sortBy.value == sortByEnum.nikAscending) {
-    displayEmployees.value = filteredEmployees.value.slice(
-      (page - 1) * validatedShow.value,
-      page * validatedShow.value,
-    )
-  } else if (sortBy.value == sortByEnum.nikDescending) {
-    const startIndex = filteredEmployees.value.length - page * validatedShow.value
-    displayEmployees.value = filteredEmployees.value
-      .slice(startIndex < 0 ? 0 : startIndex, startIndex + validatedShow.value)
-      .toSorted(() => -1)
-  } else if (sortBy.value == sortByEnum.namaAscending) {
-    displayByNamaAscending(page)
-  } else if (sortBy.value == sortByEnum.namaDescending) {
-    displayByNamaDescending(page)
-  } else if (sortBy.value == sortByEnum.jabatanAscending) {
-    displayByJabatanAscending(page)
-  } else if (sortBy.value === sortByEnum.jabatanDescending) {
-    displayByJabatanDescending(page)
-  } else {
-    displayByShift(page)
-  }
-}
-function sortByJabatan() {
-  if (sortBy.value != sortByEnum.jabatanAscending) {
-    sortBy.value = sortByEnum.jabatanAscending
-    displayByJabatanAscending(1)
-  } else {
-    sortBy.value = sortByEnum.jabatanDescending
-    displayByJabatanDescending(1)
-  }
-  symbol.value = sortBy.value
-}
-function sortByNama() {
-  if (sortBy.value != sortByEnum.namaAscending) {
-    sortBy.value = sortByEnum.namaAscending
-    displayByNamaAscending(1)
-  } else {
-    sortBy.value = sortByEnum.namaDescending
-    displayByNamaDescending(1)
-  }
-  symbol.value = sortBy.value
-}
-function sortByNik() {
-  if (sortBy.value != sortByEnum.nikAscending) {
-    sortBy.value = sortByEnum.nikAscending
-    displayEmployees.value = filteredEmployees.value.slice(0, validatedShow.value)
-  } else {
-    sortBy.value = sortByEnum.nikDescending
-    displayEmployees.value = filteredEmployees.value.slice(-validatedShow.value).sort(() => -1)
-  }
-  symbol.value = sortBy.value
-}
-function sortByShift() {
-  if (sortBy.value === fieldKeys.shift) {
-    isAscending.value = !isAscending.value
-  } else {
-    sortBy.value = fieldKeys.shift
-    isAscending.value = true
-  }
-  displayByShift(1)
-  symbol.value = sortBy.value
-}
-function displayByJabatanAscending(page) {
-  displayEmployees.value = filteredEmployees.value
-    .toSorted((a, b) => namaSortComparer(a, b, 'jabatan'))
-    .slice((page - 1) * validatedShow.value, page * validatedShow.value)
-}
-function displayByJabatanDescending(page) {
-  displayEmployees.value = filteredEmployees.value
-    .toSorted((a, b) => -namaSortComparer(a, b, 'jabatan'))
-    .slice((page - 1) * validatedShow.value, page * validatedShow.value)
-}
-function displayByNamaAscending(page) {
-  displayEmployees.value = filteredEmployees.value
-    .toSorted((a, b) => namaSortComparer(a, b))
-    .slice((page - 1) * validatedShow.value, page * validatedShow.value)
-}
-function displayByNamaDescending(page) {
-  displayEmployees.value = filteredEmployees.value
-    .toSorted((a, b) => -namaSortComparer(a, b))
-    .slice((page - 1) * validatedShow.value, page * validatedShow.value)
-}
-function displayByShift(page) {
-  const orderMultiplier = isAscending.value ? 1 : -1
-  displayEmployees.value = filteredEmployees.value
-    .toSorted((a, b) => orderMultiplier * namaSortComparer(a, b, fieldKeys.shift))
-    .slice((page - 1) * validatedShow.value, page * validatedShow.value)
-}
-function namaSortComparer(a, b, field = 'name') {
-  if (a[field] > b[field]) {
-    return 1
-  } else if (a[field] < b[field]) {
-    return -1
-  } else {
-    return 0
-  }
 }
 </script>
 

@@ -224,6 +224,8 @@ const config = {
   },
   defaultSortKey: 'name',
   initialItemsPerPage: 10,
+  minItemsPerPage: 5,
+  maxItemsPerPage: 99,
   searchFields: ['name', 'department'], // Optional: specific fields to search
 }
 
@@ -254,37 +256,47 @@ const {
   - `sortFields` (Object): Object mapping sort keys to field names and compare functions
   - `defaultSortKey` (String): Default sort key to use
   - `initialItemsPerPage` (Number): Initial number of items per page
+  - `minItemsPerPage` (Number): Minimum number of items per page (default: 5)
+  - `maxItemsPerPage` (Number): Maximum number of items per page (default: 99)
   - `searchFields` (Array): Optional array of fields to search (if empty, searches all fields)
 
 ### Returns
 
-| Property/Method          | Type                 | Description                                        |
-| ------------------------ | -------------------- | -------------------------------------------------- |
-| `sortBy`                 | Ref<string>          | Current sort key                                   |
-| `isAscending`            | Ref<boolean>         | Whether sorting is ascending                       |
-| `searchKeyword`          | Ref<string>          | Current search keyword                             |
-| `currentPage`            | Ref<number>          | Current page number                                |
-| `itemsPerPage`           | Ref<number>          | Number of items per page                           |
-| `filteredItems`          | ComputedRef<Array>   | Items filtered by search keyword                   |
-| `displayedItems`         | ComputedRef<Array>   | Items for current page after sorting and filtering |
-| `pageCount`              | ComputedRef<number>  | Total number of pages                              |
-| `isSortAscending`        | ComputedRef<boolean> | Computed version of isAscending                    |
-| `toggleSort(sortKey)`    | Function             | Toggle sort direction for a specific field         |
-| `navigateToPage(page)`   | Function             | Navigate to a specific page                        |
-| `setItemsPerPage(count)` | Function             | Set number of items per page                       |
-| `clearSearch()`          | Function             | Clear search keyword                               |
-| `resetFilters()`         | Function             | Reset all filters and sorting to default           |
-| `sortItems(itemsToSort)` | Function             | Sort items based on current configuration          |
-| `getSortState()`         | Function             | Get current sort state for UI display              |
+| Property/Method                   | Type                 | Description                                        |
+| --------------------------------- | -------------------- | -------------------------------------------------- |
+| `sortBy`                          | Ref<string>          | Current sort key                                   |
+| `isAscending`                     | Ref<boolean>         | Whether sorting is ascending                       |
+| `searchKeyword`                   | Ref<string>          | Current search keyword                             |
+| `currentPage`                     | Ref<number>          | Current page number                                |
+| `itemsPerPage`                    | Ref<number>          | Number of items per page                           |
+| `itemsPerPageMin`                 | Ref<number>          | Minimum allowed items per page                     |
+| `itemsPerPageMax`                 | Ref<number>          | Maximum allowed items per page                     |
+| `filteredItems`                   | ComputedRef<Array>   | Items filtered by search keyword                   |
+| `displayedItems`                  | ComputedRef<Array>   | Items for current page after sorting and filtering |
+| `pageCount`                       | ComputedRef<number>  | Total number of pages                              |
+| `isSortAscending`                 | ComputedRef<boolean> | Computed version of isAscending                    |
+| `toggleSort(sortKey)`             | Function             | Toggle sort direction for a specific field         |
+| `navigateToPage(page)`            | Function             | Navigate to a specific page                        |
+| `setItemsPerPage(count)`          | Function             | Set number of items per page (with validation)     |
+| `setItemsPerPageBounds(min, max)` | Function             | Set dynamic min/max bounds for items per page      |
+| `calculateItemsPerPageBounds()`   | Function             | Calculate bounds based on filtered items           |
+| `isValidItemsPerPage(count)`      | Function             | Validate if items per page value is valid          |
+| `clearSearch()`                   | Function             | Clear search keyword                               |
+| `resetFilters()`                  | Function             | Reset all filters and sorting to default           |
+| `sortItems(itemsToSort)`          | Function             | Sort items based on current configuration          |
+| `getSortState()`                  | Function             | Get current sort state for UI display              |
 
 ### Features
 
 - Multi-field sorting with custom compare functions
 - Keyword-based filtering
-- Pagination support
+- Pagination support with configurable bounds
 - Ascending/descending toggle
 - Configurable search fields
 - Automatic page reset on sort/filter changes
+- Dynamic items per page validation with min/max bounds
+- Support for numeric sorting with custom compare functions
+- Auto-clamping of items per page values
 
 ### Benefits
 
@@ -292,7 +304,94 @@ const {
 - Reduces complex table management code
 - Flexible sorting with custom comparators
 - Built-in search and pagination
+- Automatic validation of items per page
+- Dynamic bounds calculation based on filtered data
 - Easy to integrate with existing table components
+
+---
+
+## Advanced Usage Examples
+
+### Dynamic Items Per Page Bounds
+
+Calculate and set items per page bounds based on filtered data:
+
+```javascript
+const {
+  itemsPerPage,
+  itemsPerPageMin,
+  itemsPerPageMax,
+  filteredItems,
+  setItemsPerPage,
+  calculateItemsPerPageBounds,
+  isValidItemsPerPage,
+} = useTableSorting(items, config)
+
+// Watch for filtered items changes and update bounds
+watch(
+  filteredItems,
+  () => {
+    calculateItemsPerPageBounds(5, 99)
+  },
+  { immediate: true },
+)
+
+// Set items per page with automatic validation
+const newCount = 15
+setItemsPerPage(newCount) // Automatically clamped to min/max bounds
+
+// Validate user input before setting
+const userInput = 25
+if (isValidItemsPerPage(userInput)) {
+  setItemsPerPage(userInput)
+}
+```
+
+### Numeric Sorting with Custom Compare Function
+
+For numeric fields that need special handling:
+
+```javascript
+const config = {
+  sortFields: {
+    nik: {
+      field: 'nik',
+      compare: (a, b, field) => {
+        // Custom numeric comparison
+        const numA = Number(a[field])
+        const numB = Number(b[field])
+        return numA - numB
+      },
+    },
+    score: {
+      field: 'score',
+      compare: (a, b, field) => a[field] - b[field],
+    },
+  },
+  defaultSortKey: 'nik',
+  initialItemsPerPage: 10,
+}
+```
+
+### String Sorting with Case-Insensitive Comparison
+
+```javascript
+const config = {
+  sortFields: {
+    name: {
+      field: 'name',
+      compare: (a, b, field) => {
+        const strA = a[field].toLowerCase()
+        const strB = b[field].toLowerCase()
+        if (strA < strB) return -1
+        if (strA > strB) return 1
+        return 0
+      },
+    },
+  },
+  defaultSortKey: 'name',
+}
+```
 
 ---
 

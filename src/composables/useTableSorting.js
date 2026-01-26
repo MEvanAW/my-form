@@ -1,14 +1,16 @@
-import { ref, computed } from 'vue'
+import { computed, ref, unref } from 'vue'
 
 /**
  * Composable for handling table sorting and filtering functionality
  * Provides multi-field sorting, keyword filtering, and paginated display
  *
- * @param {Array} items - Array of items to sort and filter
+ * @param {Ref<Array>} items - Array of items to sort and filter
  * @param {Object} config - Configuration object
  * @param {Object} config.sortFields - Object mapping sort keys to field names and compare functions
  * @param {string} config.defaultSortKey - Default sort key to use
  * @param {number} config.initialItemsPerPage - Initial number of items per page
+ * @param {number} config.minItemsPerPage - Minimum number of items per page (default: 5)
+ * @param {number} config.maxItemsPerPage - Maximum number of items per page (default: 99)
  * @returns {Object} Sorting state, computed properties, and methods
  */
 export function useTableSorting(items, config = {}) {
@@ -17,6 +19,8 @@ export function useTableSorting(items, config = {}) {
   const searchKeyword = ref('')
   const currentPage = ref(1)
   const itemsPerPage = ref(config.initialItemsPerPage || 10)
+  const itemsPerPageMin = ref(config.minItemsPerPage || 5)
+  const itemsPerPageMax = ref(config.maxItemsPerPage || 99)
 
   /**
    * Sort items based on current sort field and direction
@@ -138,18 +142,61 @@ export function useTableSorting(items, config = {}) {
    * @param {number} page - Page number to navigate to
    */
   function navigateToPage(page) {
+    // Correct itemsPerPage if it's more than available items
+    if (itemsPerPage.value > unref(items).length) {
+      itemsPerPage.value = unref(items).length
+    }
     if (page >= 1 && page <= pageCount.value) {
       currentPage.value = page
     }
   }
 
   /**
-   * Set number of items per page
+   * Set number of items per page with validation
    * @param {number} count - Number of items per page
    */
   function setItemsPerPage(count) {
-    itemsPerPage.value = count
+    // Clamp the value within min/max bounds
+    itemsPerPage.value = Math.max(itemsPerPageMin.value, Math.min(itemsPerPageMax.value, count))
     currentPage.value = 1
+  }
+
+  /**
+   * Set dynamic bounds for items per page
+   * @param {number} min - Minimum number of items per page
+   * @param {number} max - Maximum number of items per page
+   */
+  function setItemsPerPageBounds(min, max) {
+    itemsPerPageMin.value = Math.max(1, min) // Ensure at least 1
+    itemsPerPageMax.value = Math.max(itemsPerPageMin.value, max) // Ensure max >= min
+
+    // Adjust current itemsPerPage if it's outside new bounds
+    if (itemsPerPage.value < itemsPerPageMin.value) {
+      itemsPerPage.value = itemsPerPageMin.value
+    } else if (itemsPerPage.value > itemsPerPageMax.value) {
+      itemsPerPage.value = itemsPerPageMax.value
+    }
+  }
+
+  /**
+   * Calculate dynamic min/max bounds based on filtered items
+   * @param {number} minOverride - Optional minimum override
+   * @param {number} maxOverride - Optional maximum override
+   */
+  function calculateItemsPerPageBounds(minOverride = 5, maxOverride = 99) {
+    const itemCount = filteredItems.value.length || 1
+    const min = Math.min(minOverride, itemCount)
+    const max = Math.min(itemCount, maxOverride)
+    setItemsPerPageBounds(min, max)
+  }
+
+  /**
+   * Validate if a proposed items per page value is valid
+   * @param {number} count - Number to validate
+   * @returns {boolean} True if the value is within valid bounds
+   */
+  function isValidItemsPerPage(count) {
+    return count >= itemsPerPageMin.value && count <= itemsPerPageMax.value
   }
 
   /**
@@ -187,6 +234,8 @@ export function useTableSorting(items, config = {}) {
     searchKeyword,
     currentPage,
     itemsPerPage,
+    itemsPerPageMin,
+    itemsPerPageMax,
 
     // Computed
     filteredItems,
@@ -198,6 +247,9 @@ export function useTableSorting(items, config = {}) {
     toggleSort,
     navigateToPage,
     setItemsPerPage,
+    setItemsPerPageBounds,
+    calculateItemsPerPageBounds,
+    isValidItemsPerPage,
     clearSearch,
     resetFilters,
     sortItems,
