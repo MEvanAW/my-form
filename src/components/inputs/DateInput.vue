@@ -15,7 +15,6 @@
 </template>
 
 <script setup>
-import { strings } from '@/models/strings'
 import { onMounted, ref, watch, watchEffect } from 'vue'
 import { useInputValidation } from '@/composables/useInputValidation'
 
@@ -30,13 +29,12 @@ const props = defineProps({
   classProp: String,
   min: null,
   max: null,
-  picked: null,
   disabled: Boolean,
 })
-const emit = defineEmits(['change'])
+const emit = defineEmits(['change', 'invalidate'])
 
 const isInvalid = 'is-invalid'
-const model = ref('')
+const model = defineModel()
 
 const { inputClass } = useInputValidation(props, emit)
 
@@ -49,16 +47,10 @@ onMounted(() => {
 watchEffect(() => {
   if (model.value) {
     inputClass.value[isInvalid] = false
+    emit('invalidate', false, props.id)
+  } else if (props.required) {
+    emit('invalidate', true, props.id)
   }
   emit('change', model.value, props.id)
 })
-
-watch(
-  () => props.picked,
-  (newPicked) => {
-    if (newPicked || newPicked === strings.emptyString) {
-      model.value = newPicked
-    }
-  },
-)
 </script>

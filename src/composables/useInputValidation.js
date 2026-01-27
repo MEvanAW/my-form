@@ -24,6 +24,7 @@ export function useInputValidation(props, emit) {
     (_) => {
       if (props.required && !props.modelValue) {
         setInvalidState(true)
+        emitInvalidate(true)
       }
     },
   )
@@ -45,6 +46,7 @@ export function useInputValidation(props, emit) {
   function setInvalidState(invalid) {
     isInvalid.value = invalid
     inputClass.value['is-invalid'] = invalid
+    emitInvalidate(invalid)
   }
 
   /**

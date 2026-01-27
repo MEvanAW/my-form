@@ -57,6 +57,7 @@ const i18n = createI18n({
       },
       message: {
         fileFormat: '*Format file JPEG, JPG, PNG, PDF',
+        formRequired: 'Mohon lengkapi semua field yang wajib diisi.',
         jamIstirahat: 'Termasuk 1 jam istirahat',
         lemburBerdasarkanRequired: 'Dasar pengaturan wajib dipilih.',
         shiftLemburRequired: 'Shift lembur wajib dipilih.',
@@ -110,6 +111,7 @@ const i18n = createI18n({
       },
       message: {
         fileFormat: '*File formats JPEG, JPG, PNG, PDF',
+        formRequired: 'Please fill all required fields.',
         jamIstirahat: '1 hour recess included',
         lemburBerdasarkanRequired: 'Overtime by is required.',
         shiftLemburRequired: 'Overtime shift is required.',

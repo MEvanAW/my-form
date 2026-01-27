@@ -15,11 +15,13 @@
       {{ option.label }}
     </option>
   </select>
-  <div :id="`${id}Feedback`" class="invalid-feedback">{{ errorMessage }}</div>
+  <div :id="`${id}Feedback`" class="invalid-feedback" :class="{ 'text-light': lightErrorMessage }">
+    {{ errorMessage }}
+  </div>
 </template>
 
 <script setup>
-import { onMounted, ref, watch, watchEffect } from 'vue'
+import { onMounted, watchEffect } from 'vue'
 import { useInputValidation } from '@/composables/useInputValidation'
 
 const props = defineProps({
@@ -28,6 +30,7 @@ const props = defineProps({
     type: String,
     required: true,
   },
+  lightErrorMessage: Boolean,
   placeholder: String,
   required: Boolean,
   options: {
@@ -39,7 +42,7 @@ const props = defineProps({
   classProp: String,
   disabled: Boolean,
 })
-const emit = defineEmits(['change'])
+const emit = defineEmits(['change', 'invalidate'])
 
 const isInvalid = 'is-invalid'
 const model = defineModel()
@@ -55,6 +58,9 @@ onMounted(() => {
 watchEffect(() => {
   if (model.value) {
     inputClass.value[isInvalid] = false
+    emit('invalidate', false, props.id)
+  } else if (props.required) {
+    emit('invalidate', true, props.id)
   }
   emit('change', model.value, props.id, props.additionalData)
 })

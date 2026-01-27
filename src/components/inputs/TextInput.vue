@@ -65,6 +65,9 @@ onMounted(() => {
 watchEffect(() => {
   if (model.value) {
     inputClass.value[isInvalid] = false
+    emit('invalidate', false, props.id)
+  } else if (props.required) {
+    emit('invalidate', true, props.id)
   }
   emit('change', model.value, props.id)
 })
@@ -76,6 +79,12 @@ watch(
   (_) => {
     if (typeof props.validate === functionString && !props.validate(model.value)) {
       inputClass.value[isInvalid] = true
+      emit('invalidate', true, props.id)
+    } else if (props.required && !model.value) {
+      inputClass.value[isInvalid] = true
+      emit('invalidate', true, props.id)
+    } else {
+      emit('invalidate', false, props.id)
     }
   },
 )

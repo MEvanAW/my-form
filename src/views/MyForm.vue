@@ -35,7 +35,7 @@
     </div>
     <div class="card-body">
       <div v-if="errorMessage" class="alert alert-danger" role="alert">
-        {{ errorMessage }}
+        {{ errorMessage === viewStrings.formRequired ? $t('message.formRequired') : errorMessage }}
       </div>
       <div v-if="displayWarningMessage" class="alert alert-warning" role="alert">
         {{ displayWarningMessage }}
@@ -55,6 +55,7 @@
                 :validation-toggle="validationToggle"
                 :disabled="kodeTokoOptions.length === 1"
                 @change="change"
+                @invalidate="invalidate"
               />
             </div>
           </div>
@@ -65,7 +66,7 @@
                 <input
                   id="karyawan"
                   class="form-control"
-                  :class="{ 'is-invalid': isKaryawanInvalid }"
+                  :class="{ 'is-invalid': invalidInputs.karyawan }"
                   :placeholder="$t('placeholder.karyawan')"
                   disabled
                   v-model="karyawan.display.value"
@@ -85,7 +86,11 @@
                   {{ $t('button.pilih') }}
                 </InfoButton>
               </div>
-              <div v-if="isKaryawanInvalid" id="karyawanFeedback`" class="invalid-feedback d-block">
+              <div
+                v-if="invalidInputs.karyawan"
+                id="karyawanFeedback"
+                class="invalid-feedback d-block"
+              >
                 {{ $t('message.karyawanRequired') }}
               </div>
             </div>
@@ -124,12 +129,13 @@
               <DateInput
                 id="tanggalLembur"
                 :required="true"
-                :errorMessage="$t('message.karyawanRequired')"
+                :errorMessage="$t('message.tanggalLemburRequired')"
+                v-model="inputModels.tanggalLembur.value"
                 :validation-toggle="validationToggle"
                 :min="dateInputMin()"
                 :max="dateInputMax()"
-                :picked="inputModels.tanggalLembur.value"
                 @change="change"
+                @invalidate="invalidate"
               />
             </div>
           </div>
@@ -164,6 +170,7 @@
                 :validation-toggle="validationToggle"
                 :disabled="shift?.toUpperCase() === viewStrings.off"
                 @change="change"
+                @invalidate="invalidate"
               />
             </div>
           </div>
@@ -189,8 +196,10 @@
                     :class-prop="!durasiLemburDisabled && isIstirahat ? '' : 'mb-2'"
                     :disabled="durasiLemburDisabled"
                     id="durasiLembur"
+                    :light-error-message="true"
                     :max="durasiLemburMax"
                     v-model="inputModels.durasiLembur.value"
+                    @invalidate="invalidate"
                   />
                 </div>
               </div>
@@ -254,6 +263,7 @@
                 <div class="col-sm-8">
                   <SelectInput
                     id="shiftLembur"
+                    :light-error-message="true"
                     :placeholder="$t('placeholder.shiftLembur')"
                     :required="
                       inputModels.aturBerdasarkan.value === aturBerdasarkanEnum.shiftLembur
@@ -264,6 +274,7 @@
                     :validation-toggle="validationToggle"
                     :disabled="shiftLemburDisabled"
                     @change="changeShiftLembur"
+                    @invalidate="invalidate"
                   />
                 </div>
               </div>
@@ -323,7 +334,7 @@
           <div class="row mb-2">
             <div class="col-lg-3"></div>
             <div class="col-lg-6 d-grid gap-2">
-              <button class="btn btn-success">{{ $t('button.ajukan') }}</button>
+              <button class="btn btn-success" @click="validate">{{ $t('button.ajukan') }}</button>
             </div>
             <div class="col-lg-3"></div>
           </div>
@@ -347,6 +358,7 @@ import '@/assets/css/form.css'
 import BerhasilModal from '@/components/modals/BerhasilModal.vue'
 import CariKaryawanModal from '@/components/modals/CariKaryawanModal.vue'
 import { computed, ref, watch } from 'vue'
+import { useRouter } from 'vue-router'
 import DateInput from '@/components/inputs/DateInput.vue'
 import { datesService } from '@/services/dates'
 import InfoButton from '@/components/buttons/InfoButton.vue'
@@ -356,6 +368,8 @@ import { strings } from '@/models/strings'
 import TimeInput from '@/components/inputs/TimeInput.vue'
 import { timesService } from '@/services/times'
 import { useI18n } from 'vue-i18n'
+
+const router = useRouter()
 
 const aturBerdasarkanEnum = Object.freeze({
   durasiLembur: Symbol(1),
@@ -376,6 +390,7 @@ const viewStrings = Object.freeze({
   maxTime: '23:59:59',
   namaKaryawanDefault: 'Nama karyawan tak terbaca',
   nikDefault: 'NIK tak terbaca',
+  formRequired: 'FORM_REQUIRED',
   shift: 'Shift',
   off: 'OFF',
 })
@@ -414,9 +429,17 @@ const inputModels = {
   tanggalLembur: ref(''),
   toko: ref(''),
 }
-const invalidInputs = {
+const invalidInputs = ref({
+  toko: false,
+  tanggalLembur: false,
+  karyawan: false,
+  aturBerdasarkan: false,
+  durasiLembur: false,
+  jamMulaiLembur: false,
   jamSelesaiLembur: false,
-}
+  shiftLembur: false,
+  dokumenPendukung: false,
+})
 const shiftLembur = ref('')
 const karyawan = {
   nik: viewStrings.emptyString,
@@ -439,7 +462,6 @@ const kodeTokoOptions = [
 ]
 const validationToggle = ref(false)
 const berhasilModalToggle = ref(false)
-const isKaryawanInvalid = ref(false)
 const shiftLemburOptions = [
   {
     label: '1',
@@ -461,7 +483,14 @@ const jamShiftLembur = {
 const rincianTugas = ref('')
 let file = null
 const isFileInvalid = ref(false)
-const fileInvalidMessage = ref('File invalid.')
+const fileInvalidMessage = ref('')
+
+const isFormValid = computed(() => {
+  const allInputsValid = Object.values(invalidInputs.value).every((val) => val === false)
+  const hasKaryawan = karyawan.nik && karyawan.name
+  const hasFile = file !== null
+  return allInputsValid && hasKaryawan && hasFile
+})
 
 const durasiLemburDisabled = computed(
   () => inputModels.aturBerdasarkan.value !== aturBerdasarkanEnum.durasiLembur,
@@ -499,6 +528,7 @@ watch(shiftLemburDisabled, (newShiftLemburDisabled) => {
     shiftLembur.value = viewStrings.emptyString
     jamShiftLembur.jamMulai.value = viewStrings.emptyString
     jamShiftLembur.jamSelesai.value = viewStrings.emptyString
+    invalidInputs.value.shiftLembur = false
   }
 })
 watch(
@@ -511,20 +541,6 @@ watch(
   },
 )
 
-function pilih(terpilih) {
-  karyawan.nik = terpilih.nik
-  karyawan.name = terpilih.name
-  karyawan.display.value = `${terpilih.nik || viewStrings.nikDefault} - ${terpilih.name || viewStrings.namaKaryawanDefault}`
-  isKaryawanInvalid.value = false
-  jabatan.value = terpilih.jabatan
-  if (!jabatan.value) {
-    errorMessage.value = viewStrings.jabatanErrorMessage
-  }
-  shift.value = terpilih.shift
-  shiftMulai.value = terpilih.shift_start
-  shiftSelesai.value = terpilih.shift_end
-  inputModels.jamMulaiLembur.value = terpilih.shift_end
-}
 function change(value, id) {
   inputModels[id].value = value
 }
@@ -534,34 +550,76 @@ function changeShiftLembur(value) {
   jamShiftLembur.jamMulai.value = shiftObject?.shift_start
   jamShiftLembur.jamSelesai.value = shiftObject?.shift_end
 }
-function invalidate(value, id) {
-  invalidInputs[id] = value
-}
-function refresh() {
-  router.go(0)
-}
-function onFileChanged(e) {
-  file = e.target.files[0]
-  if (!file) {
-    isFileInvalid.value = false
-    return
-  }
-  if (supportedFileTypes.indexOf(file.type) === -1) {
-    fileInvalidMessage.value = viewStrings.formatFileTidakDidukung
-    isFileInvalid.value = true
-  } else if (file.size > 1048576) {
-    fileInvalidMessage.value = viewStrings.fileMax1Mb
-    isFileInvalid.value = true
-  } else {
-    isFileInvalid.value = false
-  }
-}
 function dateInputMax() {
   const date = new Date()
   return datesService.toDatePickerString(new Date(date.getFullYear(), date.getMonth() + 2, 0))
 }
 function dateInputMin() {
   return datesService.toDatePickerString()
+}
+function invalidate(value, id) {
+  invalidInputs.value[id] = value
+}
+function onFileChanged(e) {
+  file = e.target.files[0]
+  if (!file) {
+    isFileInvalid.value = false
+    invalidInputs.value.dokumenPendukung = false
+    fileInvalidMessage.value = ''
+    return
+  }
+  if (supportedFileTypes.indexOf(file.type) === -1) {
+    fileInvalidMessage.value = viewStrings.formatFileTidakDidukung
+    isFileInvalid.value = true
+    invalidInputs.value.dokumenPendukung = true
+  } else if (file.size > 1048576) {
+    fileInvalidMessage.value = viewStrings.fileMax1Mb
+    isFileInvalid.value = true
+    invalidInputs.value.dokumenPendukung = true
+  } else {
+    isFileInvalid.value = false
+    invalidInputs.value.dokumenPendukung = false
+    fileInvalidMessage.value = ''
+  }
+}
+function pilih(terpilih) {
+  karyawan.nik = terpilih.nik
+  karyawan.name = terpilih.name
+  karyawan.display.value = `${terpilih.nik || viewStrings.nikDefault} - ${terpilih.name || viewStrings.namaKaryawanDefault}`
+  invalidInputs.value.karyawan = false
+  jabatan.value = terpilih.jabatan
+  if (!jabatan.value) {
+    errorMessage.value = viewStrings.jabatanErrorMessage
+  }
+  shift.value = terpilih.shift
+  shiftMulai.value = terpilih.shift_start
+  shiftSelesai.value = terpilih.shift_end
+  inputModels.jamMulaiLembur.value = terpilih.shift_end
+}
+function refresh() {
+  router.go(0)
+}
+function validate() {
+  errorMessage.value = ''
+
+  validationToggle.value = !validationToggle.value
+
+  if (!karyawan.nik || !karyawan.name) {
+    invalidInputs.value.karyawan = true
+  }
+
+  if (!file) {
+    isFileInvalid.value = true
+    fileInvalidMessage.value = 'Mohon unggah dokumen pendukung'
+    invalidInputs.value.dokumenPendukung = true
+  }
+
+  if (!isFormValid.value) {
+    errorMessage.value = viewStrings.formRequired
+    return
+  }
+
+  berhasilModalToggle.value = true
 }
 </script>
 
