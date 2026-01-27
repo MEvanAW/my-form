@@ -354,7 +354,6 @@
 </template>
 
 <script setup>
-import '@/assets/css/form.css'
 import BerhasilModal from '@/components/modals/BerhasilModal.vue'
 import CariKaryawanModal from '@/components/modals/CariKaryawanModal.vue'
 import { computed, ref, watch } from 'vue'

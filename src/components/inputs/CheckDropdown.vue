@@ -41,7 +41,6 @@
 </template>
 
 <script setup>
-import '@/assets/css/check-dropdown.css'
 import { strings } from '@/models/strings'
 import { computed, ref, watch } from 'vue'
 

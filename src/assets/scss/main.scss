@@ -1,0 +1,10 @@
+// Custom variables (Bootstrap overrides)
+// Example: $primary: #007bff;
+
+// Import Bootstrap
+@import 'bootstrap/scss/bootstrap.scss';
+
+// Import custom partials
+@import 'variables';
+@import 'utilities';
+@import 'components';

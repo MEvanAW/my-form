@@ -144,8 +144,7 @@
 </template>
 
 <script setup>
-import '@/assets/css/form.css'
-import '@/assets/css/position.css'
+import '@/assets/scss/main.scss'
 import { ref, watch, computed } from 'vue'
 import MyPagination from '@/components/MyPagination.vue'
 import SortNumericAscending from '@/components/svg/SortNumericAscending.vue'

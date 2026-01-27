@@ -1,8 +1,0 @@
-.my-min-width {
-  min-width: 56px;
-}
-@media (min-width: 361px) {
-  .my-min-width {
-    min-width: 100px;
-  }
-}

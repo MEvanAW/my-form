@@ -1,0 +1,36 @@
+@media (min-width: 576px) {
+  .my-btn-width {
+    min-width: 104px;
+    justify-content: center;
+  }
+  .my-pointer-events-auto {
+    pointer-events: auto !important;
+  }
+  .my-forbidden {
+    cursor: not-allowed;
+  }
+  .my-position-sm-relative {
+    position: relative !important;
+  }
+}
+@media (min-width: 768px) {
+  .my-position-md-relative {
+    position: relative !important;
+  }
+  .my-md-end {
+    position: absolute !important;
+    transform: translateY(-50%) !important;
+    right: 0 !important;
+    top: 50% !important;
+  }
+}
+.my-invalid-feedback {
+  display: none;
+  width: 100%;
+  margin-top: 0.25rem;
+  font-size: 0.875em;
+  color: #dc3545;
+}
+div.input-group.is-invalid ~ .my-invalid-feedback {
+  display: block;
+}

@@ -22,8 +22,6 @@
 </template>
 
 <script setup>
-import '@/assets/css/position.css'
-
 const { isAbsolute = true } = defineProps({
   isAbsolute: Boolean,
 })

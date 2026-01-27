@@ -15,7 +15,7 @@
 </template>
 
 <script setup>
-import '@/assets/css/form.css'
+import '@/assets/scss/main.scss'
 import LoadingIcon from '../svg/LoadingIcon.vue'
 import { onMounted, ref } from 'vue'
 

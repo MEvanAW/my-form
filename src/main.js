@@ -1,4 +1,4 @@
-import 'bootstrap/scss/bootstrap.scss'
+import '@/assets/scss/main.scss'
 
 import { createApp } from 'vue'
 import { createI18n } from 'vue-i18n'

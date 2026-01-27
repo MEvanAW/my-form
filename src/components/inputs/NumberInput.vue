@@ -34,7 +34,7 @@
 </template>
 
 <script setup>
-import '@/assets/css/form.css'
+import '@/assets/scss/main.scss'
 import { watch } from 'vue'
 import { useNumberInput } from '@/composables/useNumberInput'
 
@@ -118,10 +118,29 @@ watch(
 </script>
 
 <style scoped>
+div.input-group.is-invalid ~ .my-invalid-feedback {
+  display: block;
+}
 .input-group-text.is-invalid {
   border-color: #dc3545;
 }
 .input-group-text.is-invalid:focus {
   outline-color: #dc3545;
+}
+.my-btn-abu {
+  --bs-btn-color: #000;
+  --bs-btn-bg: #e8e9ea;
+  --bs-btn-border-color: #e8e9ea;
+  --bs-btn-hover-color: #000;
+  --bs-btn-hover-bg: #c3c4c5;
+  --bs-btn-hover-border-color: #b6b7b8;
+  --bs-btn-focus-shadow-rgb: 211, 212, 213;
+  --bs-btn-active-color: #000;
+  --bs-btn-active-bg: #b6b7b8;
+  --bs-btn-active-border-color: #aaabac;
+  --bs-btn-active-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
+  --bs-btn-disabled-color: #000;
+  --bs-btn-disabled-bg: #e8e9ea;
+  --bs-btn-disabled-border-color: #e8e9ea;
 }
 </style>
