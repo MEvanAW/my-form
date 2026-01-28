@@ -35,15 +35,13 @@
 
 <script setup>
 import '@/assets/scss/main.scss'
-import { watch } from 'vue'
-import { useNumberInput } from '@/composables/useNumberInput'
+import { computed, nextTick, ref, watch } from 'vue'
 
 const {
   disabled = false,
+  errorMessage = '',
   max = 8,
   min = 1,
-  errorMessage = '',
-  validationToggle = null,
   ...props
 } = defineProps({
   classProp: String,
@@ -58,63 +56,96 @@ const {
 const emit = defineEmits(['change', 'invalidate'])
 
 const emptyString = ''
-
-const { value, isInvalid, increment, decrement, setMin, setMax, handleBlur, handleInput } =
-  useNumberInput(
-    {
-      min: min,
-      max: max,
-      step: 1,
-      initialValue: 1,
-    },
-    emit,
-  )
-
+const isInvalid = ref(false)
 const model = defineModel()
-model.value = value.value
+model.value = 1
 
-watch(value, (newValue) => {
-  model.value = newValue
+/**
+ * Check if current value is within valid range
+ */
+const isValidRange = computed(() => {
+  return model.value >= min && model.value <= max
+})
+
+watch(model, () => {
   if (!isInvalid.value) {
     emit('invalidate', false, props.id)
   }
-  emit('change', newValue, props.id)
 })
-
-watch(model, (newModel) => {
-  if (newModel !== value.value) {
-    value.value = newModel
-  }
-})
-
 watch(
   () => max,
   (newMax) => {
-    setMax(newMax)
-    if (value.value > newMax) {
+    if (model.value > newMax) {
       isInvalid.value = true
       emit('invalidate', true, props.id)
     }
   },
 )
-
 watch(
   () => props.validationToggle,
   // eslint-disable-next-line no-unused-vars
   (_) => {
-    if (!disabled && (value.value < min || value.value > max)) {
+    if (!disabled && (model.value < min || model.value > max)) {
       isInvalid.value = true
       emit('invalidate', true, props.id)
     }
   },
 )
 
-watch(
-  () => min,
-  (newMin) => {
-    setMin(newMin)
-  },
-)
+/**
+ * Clamp value to be within valid range
+ * @param {number} val - Value to clamp
+ * @returns {number} Clamped value
+ */
+function clampValue(val) {
+  if (val < min) return min
+  if (val > max) return max
+  return val
+}
+function decrement() {
+  if (model.value > min) {
+    --model.value
+  }
+}
+/**
+ * Handle blur event
+ * @param {Event} event - Blur event
+ */
+function handleBlur(event) {
+  const val = Number(event.target.value)
+  if (isNaN(val) || val === '') {
+    model.value = min
+  } else {
+    model.value = clampValue(val)
+  }
+  validate()
+}
+/**
+ * Handle input event
+ * @param {Event} event - Input event
+ */
+function handleInput(event) {
+  const val = Number(event.target.value)
+  if (isNaN(val)) {
+    model.value = ''
+  } else {
+    model.value = val
+  }
+  validate()
+}
+function increment() {
+  if (model.value < max) {
+    ++model.value
+  }
+}
+/**
+ * Validate current value and update invalid state
+ */
+async function validate() {
+  await nextTick()
+  isInvalid.value = !isValidRange.value
+  return isValidRange.value
+}
 </script>
 
 <style scoped>

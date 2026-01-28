@@ -8,9 +8,7 @@ The following composables have been created to improve code reusability and main
 
 1. **useInputValidation** - Handles form input validation logic
 2. **useBootstrapModal** - Manages Bootstrap modal functionality
-3. **useCheckboxGroup** - Manages checkbox group state and interactions
-4. **useTableSorting** - Handles table sorting, filtering, and pagination
-5. **useNumberInput** - Manages number input with validation and range constraints
+3. **useTableSorting** - Handles table sorting, filtering, and pagination
 
 ---
 
@@ -128,76 +126,6 @@ watchForToggle(props.symbol)
 - Simplifies Bootstrap modal integration
 - Reduces boilerplate code
 - Provides consistent modal behavior across components
-
----
-
-## useCheckboxGroup
-
-Manages state for multiple checkboxes with select-all capability.
-
-### Usage
-
-```javascript
-import { useCheckboxGroup } from '@/composables/useCheckboxGroup'
-
-const options = [
-  { id: 1, name: 'Option 1' },
-  { id: 2, name: 'Option 2' },
-  { id: 3, name: 'Option 3' },
-]
-
-const {
-  checkedOptions,
-  selectAll,
-  toggleOption,
-  toggleAll,
-  getSerializedValue,
-  getSelectedIds,
-  getSelectedCount,
-  isChecked,
-  resetCheckboxes,
-  watchOptions,
-} = useCheckboxGroup(options, selectedIds.value, (selectedIds) => {
-  emit('update:modelValue', selectedIds.join(','))
-})
-```
-
-### Parameters
-
-- `options` (Array): Array of option objects (each should have an 'id' property)
-- `selectedIds` (Array): Array of currently selected IDs
-- `onUpdate` (Function): Callback function when selection changes
-
-### Returns
-
-| Property/Method                 | Type         | Description                             |
-| ------------------------------- | ------------ | --------------------------------------- |
-| `checkedOptions`                | Ref<Map>     | Map of checkbox states                  |
-| `selectAll`                     | Ref<boolean> | Whether all checkboxes are selected     |
-| `toggleOption(id)`              | Function     | Toggle a single checkbox                |
-| `toggleAll()`                   | Function     | Toggle all checkboxes                   |
-| `getSerializedValue(separator)` | Function     | Get serialized value of selected IDs    |
-| `getSelectedIds()`              | Function     | Get array of selected IDs               |
-| `getSelectedCount()`            | Function     | Get count of selected items             |
-| `isChecked(id)`                 | Function     | Check if a specific option is checked   |
-| `resetCheckboxes()`             | Function     | Reset all checkboxes to unchecked state |
-| `watchOptions(optionsRef)`      | Function     | Watch for changes in options            |
-| `initializeCheckboxes()`        | Function     | Reinitialize checkbox states            |
-
-### Features
-
-- Select-all/deselect-all functionality
-- Individual checkbox toggling
-- Automatic select-all state management
-- Flexible serialization of selected IDs
-- Option change watching
-
-### Benefits
-
-- Eliminates complex checkbox state management
-- Provides consistent checkbox behavior
-- Easy to integrate with form submissions
-- Reduces component complexity
 
 ---
 
@@ -395,113 +323,13 @@ const config = {
 
 ---
 
-## useNumberInput
-
-Manages number input with validation, range constraints, and increment/decrement functionality.
-
-### Usage
-
-```javascript
-import { useNumberInput } from '@/composables/useNumberInput'
-
-const emit = defineEmits(['update:modelValue'])
-
-const {
-  value,
-  isInvalid,
-  min,
-  max,
-  step,
-  isValidRange,
-  isBelowMin,
-  isAboveMax,
-  setValue,
-  increment,
-  decrement,
-  validate,
-  clearInvalid,
-  clampValue,
-  getInputClasses,
-  handleInput,
-  handleBlur,
-  resetToMin,
-  resetToMax,
-  resetToInitial,
-  setMin,
-  setMax,
-  setStep,
-} = useNumberInput(
-  {
-    min: 0,
-    max: 100,
-    step: 1,
-    initialValue: 50,
-  },
-  emit,
-)
-```
-
-### Parameters
-
-- `options` (Object): Configuration options
-  - `min` (Number): Minimum allowed value (default: 0)
-  - `max` (Number): Maximum allowed value (default: Infinity)
-  - `step` (Number): Step size for increment/decrement (default: 1)
-  - `initialValue` (Number): Initial value
-- `emit` (Function): Optional emit function for custom events
-
-### Returns
-
-| Property/Method      | Type                 | Description                         |
-| -------------------- | -------------------- | ----------------------------------- |
-| `value`              | Ref<number>          | Current input value                 |
-| `isInvalid`          | Ref<boolean>         | Whether the value is invalid        |
-| `min`                | Ref<number>          | Minimum allowed value               |
-| `max`                | Ref<number>          | Maximum allowed value               |
-| `step`               | Ref<number>          | Step size                           |
-| `isValidRange`       | ComputedRef<boolean> | Whether value is within valid range |
-| `isBelowMin`         | ComputedRef<boolean> | Whether value is below minimum      |
-| `isAboveMax`         | ComputedRef<boolean> | Whether value is above maximum      |
-| `setValue(val)`      | Function             | Set value and validate it           |
-| `increment()`        | Function             | Increment value by step             |
-| `decrement()`        | Function             | Decrement value by step             |
-| `validate()`         | Function             | Validate current value              |
-| `clearInvalid()`     | Function             | Clear invalid state                 |
-| `clampValue(val)`    | Function             | Clamp value to valid range          |
-| `getInputClasses()`  | Function             | Get CSS classes for validation      |
-| `handleInput(event)` | Function             | Handle input event                  |
-| `handleBlur(event)`  | Function             | Handle blur event                   |
-| `resetToMin()`       | Function             | Reset to minimum value              |
-| `resetToMax()`       | Function             | Reset to maximum value              |
-| `resetToInitial()`   | Function             | Reset to initial value              |
-| `setMin(newMin)`     | Function             | Set minimum value                   |
-| `setMax(newMax)`     | Function             | Set maximum value                   |
-| `setStep(newStep)`   | Function             | Set step value                      |
-
-### Features
-
-- Range validation (min/max)
-- Increment/decrement with step size
-- Automatic value clamping
-- Invalid state management
-- Event handling for input and blur
-- Reset functionality
-- Dynamic min/max/step updates
-
-### Benefits
-
-- Reduces number input boilerplate code
-- Provides robust validation
-- Easy to add increment/decrement controls
-- Consistent behavior across number inputs
-- Handles edge cases (NaN, out of range)
-
----
-
 ## Best Practices
 
-1. **Use Composables for Stateful Logic**: When you find yourself repeating the same reactive logic across multiple components, consider extracting it into a composable.
-
+1. **Use Composables for Stateful Logic**: When you find yourself repeating the same reactive logic across multiple components, consider extracting it into a composable. When extracting does make sense (even if currently single-use):
+   - Represents a conceptual concern (e.g. pagination, form validation, polling)
+   - Is non-trivial (multiple refs, effects, watchers)
+   - Might be reused soon or plausibly (not hypothetically)
+   - Improves testability or readability by isolating complexity
 2. **Keep Composables Focused**: Each composable should have a single, well-defined responsibility.
 
 3. **Document Your Composables**: Always include JSDoc comments explaining parameters, returns, and usage.
@@ -511,6 +339,12 @@ const {
 5. **Avoid Side Effects**: Composables should be pure functions that can be tested independently.
 
 6. **Use Composables Together**: Multiple composables can be used together in a single component for complex functionality.
+
+7. **Do not extract inherently coupled concerns into composable(s)**: Inherently coupled concerns should be colocated instead. When not to extract into a composable:
+   - Is component-specific (e.g. DOM structure assumptions, specific props/emits)
+   - Depends heavily on the component’s local state
+   - Would need to be parameterized awkwardly just to live outside
+   - Is small enough that extraction would hurt readability
 
 ---
 
@@ -582,7 +416,7 @@ Potential additional composables that could be created:
 
 ## Conclusion
 
-These composables provide a solid foundation for reducing code duplication and improving maintainability in your Vue.js application. By extracting common patterns into reusable functions, you can:
+These composables provide a solid foundation for reducing code duplication and improving maintainability in Vue.js application. By extracting common patterns into reusable functions, we can:
 
 - Reduce component complexity
 - Improve code reusability
@@ -590,4 +424,4 @@ These composables provide a solid foundation for reducing code duplication and i
 - Ensure consistent behavior across components
 - Simplify maintenance and updates
 
-For questions or suggestions regarding these composables, please refer to the code comments or reach out to the development team.
+However, do not extract inherently coupled concerns into composable(s). Inherently coupled concerns should be colocated instead.

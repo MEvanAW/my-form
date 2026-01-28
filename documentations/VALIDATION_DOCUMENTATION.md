@@ -36,8 +36,7 @@ Form Component (MyForm.vue)
     ├── SelectInput
     └── TimeInput
         └── Composables
-            ├── useInputValidation
-            └── useNumberInput
+            └── useInputValidation
 ```
 
 ### Data Flow
@@ -131,73 +130,6 @@ const { inputClass } = useInputValidation(props, emit)
 - **`clearInvalid()`**: Clears invalid state
 - **`emitInvalidate(invalid)`**: Emits invalidate event to parent
 
-### `useNumberInput`
-
-Specialized composable for number inputs with range validation.
-
-#### Parameters
-
-```typescript
-function useNumberInput(
-  options: {
-    min?: number // Minimum allowed value (default: 0)
-    max?: number // Maximum allowed value (default: Infinity)
-    step?: number // Increment/decrement step (default: 1)
-    initialValue?: number // Starting value
-  },
-  emit: Function,
-)
-```
-
-#### Returns
-
-```typescript
-{
-  value: Ref<number>               // Current value
-  isInvalid: Ref<boolean>          // Validation state
-  min: Ref<number>                 // Current minimum
-  max: Ref<number>                 // Current maximum
-  step: Ref<number>                // Current step
-  isValidRange: ComputedRef<boolean>
-  isBelowMin: ComputedRef<boolean>
-  isAboveMax: ComputedRef<boolean>
-  increment: () => void
-  decrement: () => void
-  validate: () => boolean
-  clearInvalid: () => void
-  clampValue: (val: number) => number
-  setMin: (newMin: number) => void
-  setMax: (newMax: number) => void
-  setStep: (newStep: number) => void
-}
-```
-
-#### Usage Example
-
-```vue
-<script setup>
-import { useNumberInput } from '@/composables/useNumberInput'
-
-const props = defineProps({
-  min: { type: Number, default: 1 },
-  max: { type: Number, default: 8 },
-  errorMessage: String,
-})
-
-const emit = defineEmits(['change', 'invalidate'])
-
-const { value, isInvalid, increment, decrement, clearInvalid } = useNumberInput(
-  {
-    min: props.min,
-    max: props.max,
-    step: 1,
-    initialValue: 1,
-  },
-  emit,
-)
-</script>
-```
-
 ## Input Components
 
 ### TextInput
@@ -232,41 +164,6 @@ Text input with required field validation.
   :error-message="Username is required"
   v-model="formData.username"
   :validation-toggle="validationTrigger"
-  @invalidate="handleInvalidate"
-/>
-```
-
-### NumberInput
-
-Number input with range validation and increment/decrement controls.
-
-#### Props
-
-| Prop             | Type    | Required | Default | Description                       |
-| ---------------- | ------- | -------- | ------- | --------------------------------- |
-| id               | String  | Yes      | -       | Input element ID                  |
-| min              | Number  | No       | 1       | Minimum value                     |
-| max              | Number  | No       | 8       | Maximum value                     |
-| errorMessage     | String  | No       | -       | Error message (fallback provided) |
-| validationToggle | any     | No       | null    | Signal to trigger validation      |
-| disabled         | Boolean | No       | false   | Whether input is disabled         |
-
-#### Events
-
-| Event      | Payload                        | Description                      |
-| ---------- | ------------------------------ | -------------------------------- |
-| change     | (value: number, id: string)    | Fired on value change            |
-| invalidate | (isValid: boolean, id: string) | Fired on validation state change |
-
-#### Example
-
-```vue
-<NumberInput
-  id="quantity"
-  :min="1"
-  :max="10"
-  error-message="Quantity must be between 1 and 10"
-  v-model="formData.quantity"
   @invalidate="handleInvalidate"
 />
 ```
@@ -802,7 +699,20 @@ function validate() {
 
 **Problem**: Error message doesn't match min/max values
 
-**Solution**: Provide custom `errorMessage` prop:
+**Troubleshooting**: Check .invalid-feedback div within NumberInput template
+
+```vue
+<div
+  v-if="!disabled && isInvalid"
+  :id="`${id}Feedback`"
+  class="invalid-feedback d-block"
+  :class="{ 'text-light': lightErrorMessage }"
+>
+  {{ errorMessage || 'Nilai harus antara ' + min + ' dan ' + max }}
+</div>
+```
+
+**Quick fix**: Provide custom `errorMessage` prop (doesn't address underlying issue within the component)
 
 ```vue
 <NumberInput :min="5" :max="20" error-message="Value must be between 5 and 20" ... />
